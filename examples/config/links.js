@@ -19,16 +19,16 @@ export default {
             url: 'https://openthree.github.io/three-cesium-examples/'
         },
         {
-            name: '🍏Editor',
-            url: 'https://z2586300277.github.io/threejs-editor/'
-        },
-        {
             name: '🔥WebGPU',
             url: 'https://openthree.github.io/webgpu'
         },
         {
             name: '🍃OpenThree',
             url: 'https://openthree.github.io/three-cesium-links/'
-        }
+        },
+        {
+            name: '🍏Editor',
+            url: 'https://z2586300277.github.io/threejs-editor/'
+        },
     ]
 }
