@@ -73,6 +73,7 @@ let sceneGraph;
  * ```
  *
  * @augments Loader
+ * @three_import import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
  */
 class FBXLoader extends Loader {
 
@@ -137,7 +138,7 @@ class FBXLoader extends Loader {
 	/**
 	 * Parses the given FBX data and returns the resulting group.
 	 *
-	 * @param {Array} FBXBuffer - The raw FBX data as an array buffer.
+	 * @param {ArrayBuffer} FBXBuffer - The raw FBX data as an array buffer.
 	 * @param {string} path - The URL base path.
 	 * @return {Group} An object representing the parsed asset.
 	 */
@@ -347,6 +348,11 @@ class FBXTreeParser {
 				type = 'image/tga';
 				break;
 
+			case 'webp':
+
+				type = 'image/webp';
+				break;
+
 			default:
 
 				console.warn( 'FBXLoader: Image type "' + extension + '" is not supported.' );
@@ -436,21 +442,10 @@ class FBXTreeParser {
 	// load a texture specified as a blob or data URI, or via an external URL using TextureLoader
 	loadTexture( textureNode, images ) {
 
-		const nonNativeExtensions = new Set( [ 'tga', 'tif', 'tiff', 'exr', 'dds', 'hdr', 'ktx2' ] );
-
 		const extension = textureNode.FileName.split( '.' ).pop().toLowerCase();
 
-		const loader = nonNativeExtensions.has( extension ) ? this.manager.getHandler( `.${extension}` ) : this.textureLoader;
-
-		if ( ! loader ) {
-
-			console.warn(
-				`FBXLoader: ${extension.toUpperCase()} loader not found, creating placeholder texture for`,
-				textureNode.RelativeFilename
-			);
-			return new Texture();
-
-		}
+		let loader = this.manager.getHandler( `.${extension}` );
+		if ( loader === null) loader = this.textureLoader;
 
 		const loaderPath = loader.path;
 
@@ -473,6 +468,13 @@ class FBXTreeParser {
 				loader.setPath( undefined );
 
 			}
+
+		}
+
+		if ( fileName === undefined ) {
+
+			console.warn( 'FBXLoader: Undefined filename, creating placeholder texture.' );
+			return new Texture();
 
 		}
 
