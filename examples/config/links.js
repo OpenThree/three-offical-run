@@ -1,9 +1,11 @@
 import { HOST } from "./host.js"
+import { REVISION } from '../../build/three.module.min.js'
+
 
 // 企业可根据自己的需求修改url 成自己的导航地址 链接
 export default {
     site: {
-        name: 'Three JS Ⓡ176',
+        name: 'ThreeJS - Ⓡ' + REVISION,
         url: 'https://threejs.org/',
         logo: HOST + 'files/site/logo.svg',
         footName: '- Home',
