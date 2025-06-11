@@ -3,7 +3,7 @@
  * Copyright 2010-2025 Three.js Authors
  * SPDX-License-Identifier: MIT
  */
-import { Color, Vector2, Vector3, Vector4, Matrix2, Matrix3, Matrix4, EventDispatcher, MathUtils, WebGLCoordinateSystem, WebGPUCoordinateSystem, ColorManagement, SRGBTransfer, NoToneMapping, StaticDrawUsage, InterleavedBuffer, InterleavedBufferAttribute, DynamicDrawUsage, NoColorSpace, UnsignedIntType, IntType, NearestFilter, Sphere, BackSide, Euler, CubeReflectionMapping, CubeRefractionMapping, TangentSpaceNormalMap, ObjectSpaceNormalMap, InstancedInterleavedBuffer, InstancedBufferAttribute, DataArrayTexture, FloatType, FramebufferTexture, LinearMipmapLinearFilter, DepthTexture, Material, NormalBlending, LineBasicMaterial, LineDashedMaterial, NoBlending, MeshNormalMaterial, SRGBColorSpace, WebGLCubeRenderTarget, BoxGeometry, Mesh, Scene, LinearFilter, CubeCamera, CubeTexture, EquirectangularReflectionMapping, EquirectangularRefractionMapping, AddOperation, MixOperation, MultiplyOperation, MeshBasicMaterial, MeshLambertMaterial, MeshPhongMaterial, OrthographicCamera, PerspectiveCamera, RenderTarget, LinearSRGBColorSpace, RGBAFormat, HalfFloatType, CubeUVReflectionMapping, BufferGeometry, BufferAttribute, Texture, MeshStandardMaterial, MeshPhysicalMaterial, MeshToonMaterial, MeshMatcapMaterial, SpriteMaterial, PointsMaterial, ShadowMaterial, Uint32BufferAttribute, Uint16BufferAttribute, arrayNeedsUint32, DoubleSide, Camera, DepthStencilFormat, DepthFormat, UnsignedInt248Type, UnsignedByteType, Plane, Object3D, LinearMipMapLinearFilter, Float32BufferAttribute, UVMapping, VSMShadowMap, LessCompare, RGFormat, BasicShadowMap, SphereGeometry, LinearMipmapNearestFilter, NearestMipmapLinearFilter, Float16BufferAttribute, REVISION, ArrayCamera, PlaneGeometry, FrontSide, CustomBlending, AddEquation, ZeroFactor, CylinderGeometry, Quaternion, WebXRController, RAD2DEG, PCFShadowMap, FrustumArray, Frustum, DataTexture, RedIntegerFormat, RedFormat, ShortType, ByteType, UnsignedShortType, RGIntegerFormat, RGBIntegerFormat, RGBFormat, RGBAIntegerFormat, warnOnce, createCanvasElement, ReverseSubtractEquation, SubtractEquation, OneMinusDstAlphaFactor, OneMinusDstColorFactor, OneMinusSrcAlphaFactor, OneMinusSrcColorFactor, DstAlphaFactor, DstColorFactor, SrcAlphaSaturateFactor, SrcAlphaFactor, SrcColorFactor, OneFactor, CullFaceNone, CullFaceBack, CullFaceFront, MultiplyBlending, SubtractiveBlending, AdditiveBlending, NotEqualDepth, GreaterDepth, GreaterEqualDepth, EqualDepth, LessEqualDepth, LessDepth, AlwaysDepth, NeverDepth, UnsignedShort4444Type, UnsignedShort5551Type, UnsignedInt5999Type, AlphaFormat, RGB_S3TC_DXT1_Format, RGBA_S3TC_DXT1_Format, RGBA_S3TC_DXT3_Format, RGBA_S3TC_DXT5_Format, RGB_PVRTC_4BPPV1_Format, RGB_PVRTC_2BPPV1_Format, RGBA_PVRTC_4BPPV1_Format, RGBA_PVRTC_2BPPV1_Format, RGB_ETC1_Format, RGB_ETC2_Format, RGBA_ETC2_EAC_Format, RGBA_ASTC_4x4_Format, RGBA_ASTC_5x4_Format, RGBA_ASTC_5x5_Format, RGBA_ASTC_6x5_Format, RGBA_ASTC_6x6_Format, RGBA_ASTC_8x5_Format, RGBA_ASTC_8x6_Format, RGBA_ASTC_8x8_Format, RGBA_ASTC_10x5_Format, RGBA_ASTC_10x6_Format, RGBA_ASTC_10x8_Format, RGBA_ASTC_10x10_Format, RGBA_ASTC_12x10_Format, RGBA_ASTC_12x12_Format, RGBA_BPTC_Format, RED_RGTC1_Format, SIGNED_RED_RGTC1_Format, RED_GREEN_RGTC2_Format, SIGNED_RED_GREEN_RGTC2_Format, MirroredRepeatWrapping, ClampToEdgeWrapping, RepeatWrapping, NearestMipmapNearestFilter, NotEqualCompare, GreaterCompare, GreaterEqualCompare, EqualCompare, LessEqualCompare, AlwaysCompare, NeverCompare, LinearTransfer, NotEqualStencilFunc, GreaterStencilFunc, GreaterEqualStencilFunc, EqualStencilFunc, LessEqualStencilFunc, LessStencilFunc, AlwaysStencilFunc, NeverStencilFunc, DecrementWrapStencilOp, IncrementWrapStencilOp, DecrementStencilOp, IncrementStencilOp, InvertStencilOp, ReplaceStencilOp, ZeroStencilOp, KeepStencilOp, MaxEquation, MinEquation, SpotLight, PointLight, DirectionalLight, RectAreaLight, AmbientLight, HemisphereLight, LightProbe, LinearToneMapping, ReinhardToneMapping, CineonToneMapping, ACESFilmicToneMapping, AgXToneMapping, NeutralToneMapping, Group, Loader, FileLoader, MaterialLoader, ObjectLoader } from './three.core.js';
+import { Color, Vector2, Vector3, Vector4, Matrix2, Matrix3, Matrix4, EventDispatcher, MathUtils, WebGLCoordinateSystem, WebGPUCoordinateSystem, ColorManagement, SRGBTransfer, NoToneMapping, StaticDrawUsage, InterleavedBuffer, InterleavedBufferAttribute, DynamicDrawUsage, NoColorSpace, Texture, UnsignedIntType, IntType, NearestFilter, Sphere, BackSide, Euler, CubeTexture, CubeReflectionMapping, CubeRefractionMapping, TangentSpaceNormalMap, ObjectSpaceNormalMap, InstancedInterleavedBuffer, InstancedBufferAttribute, DataArrayTexture, FloatType, FramebufferTexture, LinearMipmapLinearFilter, DepthTexture, Material, NormalBlending, LineBasicMaterial, LineDashedMaterial, NoBlending, MeshNormalMaterial, SRGBColorSpace, WebGLCubeRenderTarget, BoxGeometry, Mesh, Scene, LinearFilter, CubeCamera, EquirectangularReflectionMapping, EquirectangularRefractionMapping, AddOperation, MixOperation, MultiplyOperation, MeshBasicMaterial, MeshLambertMaterial, MeshPhongMaterial, OrthographicCamera, PerspectiveCamera, RenderTarget, LinearSRGBColorSpace, RGBAFormat, HalfFloatType, CubeUVReflectionMapping, BufferGeometry, BufferAttribute, MeshStandardMaterial, MeshPhysicalMaterial, MeshToonMaterial, MeshMatcapMaterial, SpriteMaterial, PointsMaterial, ShadowMaterial, Uint32BufferAttribute, Uint16BufferAttribute, arrayNeedsUint32, DoubleSide, Camera, DepthStencilFormat, DepthFormat, UnsignedInt248Type, UnsignedByteType, Plane, Object3D, LinearMipMapLinearFilter, Float32BufferAttribute, UVMapping, VSMShadowMap, LessCompare, RGFormat, BasicShadowMap, SphereGeometry, LinearMipmapNearestFilter, NearestMipmapLinearFilter, Float16BufferAttribute, REVISION, ArrayCamera, PlaneGeometry, FrontSide, CustomBlending, AddEquation, ZeroFactor, CylinderGeometry, Quaternion, WebXRController, RAD2DEG, PCFShadowMap, FrustumArray, Frustum, DataTexture, RedIntegerFormat, RedFormat, ShortType, ByteType, UnsignedShortType, RGIntegerFormat, RGBIntegerFormat, RGBFormat, RGBAIntegerFormat, warnOnce, createCanvasElement, ReverseSubtractEquation, SubtractEquation, OneMinusDstAlphaFactor, OneMinusDstColorFactor, OneMinusSrcAlphaFactor, OneMinusSrcColorFactor, DstAlphaFactor, DstColorFactor, SrcAlphaSaturateFactor, SrcAlphaFactor, SrcColorFactor, OneFactor, CullFaceNone, CullFaceBack, CullFaceFront, MultiplyBlending, SubtractiveBlending, AdditiveBlending, NotEqualDepth, GreaterDepth, GreaterEqualDepth, EqualDepth, LessEqualDepth, LessDepth, AlwaysDepth, NeverDepth, UnsignedShort4444Type, UnsignedShort5551Type, UnsignedInt5999Type, AlphaFormat, RGB_S3TC_DXT1_Format, RGBA_S3TC_DXT1_Format, RGBA_S3TC_DXT3_Format, RGBA_S3TC_DXT5_Format, RGB_PVRTC_4BPPV1_Format, RGB_PVRTC_2BPPV1_Format, RGBA_PVRTC_4BPPV1_Format, RGBA_PVRTC_2BPPV1_Format, RGB_ETC1_Format, RGB_ETC2_Format, RGBA_ETC2_EAC_Format, RGBA_ASTC_4x4_Format, RGBA_ASTC_5x4_Format, RGBA_ASTC_5x5_Format, RGBA_ASTC_6x5_Format, RGBA_ASTC_6x6_Format, RGBA_ASTC_8x5_Format, RGBA_ASTC_8x6_Format, RGBA_ASTC_8x8_Format, RGBA_ASTC_10x5_Format, RGBA_ASTC_10x6_Format, RGBA_ASTC_10x8_Format, RGBA_ASTC_10x10_Format, RGBA_ASTC_12x10_Format, RGBA_ASTC_12x12_Format, RGBA_BPTC_Format, RED_RGTC1_Format, SIGNED_RED_RGTC1_Format, RED_GREEN_RGTC2_Format, SIGNED_RED_GREEN_RGTC2_Format, MirroredRepeatWrapping, ClampToEdgeWrapping, RepeatWrapping, NearestMipmapNearestFilter, NotEqualCompare, GreaterCompare, GreaterEqualCompare, EqualCompare, LessEqualCompare, AlwaysCompare, NeverCompare, LinearTransfer, NotEqualStencilFunc, GreaterStencilFunc, GreaterEqualStencilFunc, EqualStencilFunc, LessEqualStencilFunc, LessStencilFunc, AlwaysStencilFunc, NeverStencilFunc, DecrementWrapStencilOp, IncrementWrapStencilOp, DecrementStencilOp, IncrementStencilOp, InvertStencilOp, ReplaceStencilOp, ZeroStencilOp, KeepStencilOp, MaxEquation, MinEquation, SpotLight, PointLight, DirectionalLight, RectAreaLight, AmbientLight, HemisphereLight, LightProbe, LinearToneMapping, ReinhardToneMapping, CineonToneMapping, ACESFilmicToneMapping, AgXToneMapping, NeutralToneMapping, Group, Loader, FileLoader, MaterialLoader, ObjectLoader } from './three.core.js';
 export { AdditiveAnimationBlendMode, AnimationAction, AnimationClip, AnimationLoader, AnimationMixer, AnimationObjectGroup, AnimationUtils, ArcCurve, ArrowHelper, AttachedBindMode, Audio, AudioAnalyser, AudioContext, AudioListener, AudioLoader, AxesHelper, BasicDepthPacking, BatchedMesh, Bone, BooleanKeyframeTrack, Box2, Box3, Box3Helper, BoxHelper, BufferGeometryLoader, Cache, CameraHelper, CanvasTexture, CapsuleGeometry, CatmullRomCurve3, CircleGeometry, Clock, ColorKeyframeTrack, CompressedArrayTexture, CompressedCubeTexture, CompressedTexture, CompressedTextureLoader, ConeGeometry, ConstantAlphaFactor, ConstantColorFactor, Controls, CubeTextureLoader, CubicBezierCurve, CubicBezierCurve3, CubicInterpolant, CullFaceFrontBack, Curve, CurvePath, CustomToneMapping, Cylindrical, Data3DTexture, DataTextureLoader, DataUtils, DefaultLoadingManager, DetachedBindMode, DirectionalLightHelper, DiscreteInterpolant, DodecahedronGeometry, DynamicCopyUsage, DynamicReadUsage, EdgesGeometry, EllipseCurve, ExtrudeGeometry, Fog, FogExp2, GLBufferAttribute, GLSL1, GLSL3, GridHelper, HemisphereLightHelper, IcosahedronGeometry, ImageBitmapLoader, ImageLoader, ImageUtils, InstancedBufferGeometry, InstancedMesh, Int16BufferAttribute, Int32BufferAttribute, Int8BufferAttribute, Interpolant, InterpolateDiscrete, InterpolateLinear, InterpolateSmooth, InterpolationSamplingMode, InterpolationSamplingType, KeyframeTrack, LOD, LatheGeometry, Layers, Light, Line, Line3, LineCurve, LineCurve3, LineLoop, LineSegments, LinearInterpolant, LinearMipMapNearestFilter, LoaderUtils, LoadingManager, LoopOnce, LoopPingPong, LoopRepeat, MOUSE, MeshDepthMaterial, MeshDistanceMaterial, NearestMipMapLinearFilter, NearestMipMapNearestFilter, NormalAnimationBlendMode, NumberKeyframeTrack, OctahedronGeometry, OneMinusConstantAlphaFactor, OneMinusConstantColorFactor, PCFSoftShadowMap, Path, PlaneHelper, PointLightHelper, Points, PolarGridHelper, PolyhedronGeometry, PositionalAudio, PropertyBinding, PropertyMixer, QuadraticBezierCurve, QuadraticBezierCurve3, QuaternionKeyframeTrack, QuaternionLinearInterpolant, RGBADepthPacking, RGBDepthPacking, RGB_BPTC_SIGNED_Format, RGB_BPTC_UNSIGNED_Format, RGDepthPacking, RawShaderMaterial, Ray, Raycaster, RenderTarget3D, RingGeometry, ShaderMaterial, Shape, ShapeGeometry, ShapePath, ShapeUtils, Skeleton, SkeletonHelper, SkinnedMesh, Source, Spherical, SphericalHarmonics3, SplineCurve, SpotLightHelper, Sprite, StaticCopyUsage, StaticReadUsage, StereoCamera, StreamCopyUsage, StreamDrawUsage, StreamReadUsage, StringKeyframeTrack, TOUCH, TetrahedronGeometry, TextureLoader, TextureUtils, TimestampQuery, TorusGeometry, TorusKnotGeometry, Triangle, TriangleFanDrawMode, TriangleStripDrawMode, TrianglesDrawMode, TubeGeometry, Uint8BufferAttribute, Uint8ClampedBufferAttribute, Uniform, UniformsGroup, VectorKeyframeTrack, VideoFrameTexture, VideoTexture, WebGL3DRenderTarget, WebGLArrayRenderTarget, WebGLRenderTarget, WireframeGeometry, WrapAroundEnding, ZeroCurvatureEnding, ZeroSlopeEnding } from './three.core.js';
 
 const refreshUniforms = [
@@ -3196,7 +3196,7 @@ const ShaderNodeObject = function ( obj, altType = null ) {
 
 	} else if ( type === 'shader' ) {
 
-		return Fn( obj );
+		return obj.isFn ? obj : Fn( obj );
 
 	}
 
@@ -3650,7 +3650,9 @@ const Fn = ( jsFunc, layout = null ) => {
 
 		nodeObjects( params );
 
-		if ( params[ 0 ] && params[ 0 ].isNode ) {
+		const isArrayAsParameter = params[ 0 ] && ( params[ 0 ].isNode || Object.getPrototypeOf( params[ 0 ] ) !== Object.prototype );
+
+		if ( isArrayAsParameter ) {
 
 			inputs = [ ...params ];
 
@@ -3670,6 +3672,8 @@ const Fn = ( jsFunc, layout = null ) => {
 
 	fn.shaderNode = shaderNode;
 	fn.id = shaderNode.id;
+
+	fn.isFn = true;
 
 	fn.getNodeType = ( ...params ) => shaderNode.getNodeType( ...params );
 	fn.getCacheKey = ( ...params ) => shaderNode.getCacheKey( ...params );
@@ -9949,6 +9953,8 @@ class MaxMipLevelNode extends UniformNode {
  */
 const maxMipLevel = /*@__PURE__*/ nodeProxy( MaxMipLevelNode ).setParameterLength( 1 );
 
+const EmptyTexture$1 = /*@__PURE__*/ new Texture();
+
 /**
  * This type of uniform node represents a 2D texture.
  *
@@ -9965,12 +9971,12 @@ class TextureNode extends UniformNode {
 	/**
 	 * Constructs a new texture node.
 	 *
-	 * @param {Texture} value - The texture.
+	 * @param {Texture} [value=EmptyTexture] - The texture.
 	 * @param {?Node<vec2|vec3>} [uvNode=null] - The uv node.
 	 * @param {?Node<int>} [levelNode=null] - The level node.
 	 * @param {?Node<float>} [biasNode=null] - The bias node.
 	 */
-	constructor( value, uvNode = null, levelNode = null, biasNode = null ) {
+	constructor( value = EmptyTexture$1, uvNode = null, levelNode = null, biasNode = null ) {
 
 		super( value );
 
@@ -10675,20 +10681,64 @@ class TextureNode extends UniformNode {
  *
  * @tsl
  * @function
- * @param {Texture} value - The texture.
+ * @param {?Texture} value - The texture.
  * @param {?Node<vec2|vec3>} [uvNode=null] - The uv node.
  * @param {?Node<int>} [levelNode=null] - The level node.
  * @param {?Node<float>} [biasNode=null] - The bias node.
  * @returns {TextureNode}
  */
-const texture = /*@__PURE__*/ nodeProxy( TextureNode ).setParameterLength( 1, 4 );
+const textureBase = /*@__PURE__*/ nodeProxy( TextureNode ).setParameterLength( 1, 4 ).setName( 'texture' );
+
+/**
+ * TSL function for creating a texture node or sample a texture node already existing.
+ *
+ * @tsl
+ * @function
+ * @param {?Texture|TextureNode} [value=EmptyTexture] - The texture.
+ * @param {?Node<vec2|vec3>} [uvNode=null] - The uv node.
+ * @param {?Node<int>} [levelNode=null] - The level node.
+ * @param {?Node<float>} [biasNode=null] - The bias node.
+ * @returns {TextureNode}
+ */
+const texture = ( value = EmptyTexture$1, uvNode = null, levelNode = null, biasNode = null ) => {
+
+	let textureNode;
+
+	if ( value && value.isTextureNode === true ) {
+
+		textureNode = nodeObject( value.clone() );
+		textureNode.referenceNode = value.getSelf(); // Ensure the reference is set to the original node
+
+		if ( uvNode !== null ) textureNode.uvNode = nodeObject( uvNode );
+		if ( levelNode !== null ) textureNode.levelNode = nodeObject( levelNode );
+		if ( biasNode !== null ) textureNode.biasNode = nodeObject( biasNode );
+
+	} else {
+
+		textureNode = textureBase( value, uvNode, levelNode, biasNode );
+
+	}
+
+	return textureNode;
+
+};
+
+/**
+ * TSL function for creating a uniform texture node.
+ *
+ * @tsl
+ * @function
+ * @param {?Texture} value - The texture.
+ * @returns {TextureNode}
+ */
+const uniformTexture = ( value = EmptyTexture$1 ) => texture( value );
 
 /**
  * TSL function for creating a texture node that fetches/loads texels without interpolation.
  *
  * @tsl
  * @function
- * @param {Texture} value - The texture.
+ * @param {?Texture|TextureNode} [value=EmptyTexture] - The texture.
  * @param {?Node<vec2|vec3>} [uvNode=null] - The uv node.
  * @param {?Node<int>} [levelNode=null] - The level node.
  * @param {?Node<float>} [biasNode=null] - The bias node.
@@ -11637,7 +11687,7 @@ const objectViewPosition = /*@__PURE__*/ nodeProxy( Object3DNode, Object3DNode.V
  * @tsl
  * @function
  * @param {?Object3D} [object3d] - The 3D object.
- * @returns {Object3DNode<vec3>}
+ * @returns {Object3DNode<float>}
  */
 const objectRadius = /*@__PURE__*/ nodeProxy( Object3DNode, Object3DNode.RADIUS ).setParameterLength( 1 );
 
@@ -12213,6 +12263,8 @@ const reflectVector = /*@__PURE__*/ reflectView.transformDirection( cameraViewMa
  */
 const refractVector = /*@__PURE__*/ refractView.transformDirection( cameraViewMatrix ).toVar( 'reflectVector' );
 
+const EmptyTexture = /*@__PURE__*/ new CubeTexture();
+
 /**
  * This type of uniform node represents a cube texture.
  *
@@ -12344,7 +12396,51 @@ class CubeTextureNode extends TextureNode {
  * @param {?Node<float>} [biasNode=null] - The bias node.
  * @returns {CubeTextureNode}
  */
-const cubeTexture = /*@__PURE__*/ nodeProxy( CubeTextureNode ).setParameterLength( 1, 4 ).setName( 'cubeTexture' );
+const cubeTextureBase = /*@__PURE__*/ nodeProxy( CubeTextureNode ).setParameterLength( 1, 4 ).setName( 'cubeTexture' );
+
+/**
+ * TSL function for creating a cube texture uniform node.
+ *
+ * @tsl
+ * @function
+ * @param {?CubeTexture|CubeTextureNode} [value=EmptyTexture] - The cube texture.
+ * @param {?Node<vec3>} [uvNode=null] - The uv node.
+ * @param {?Node<int>} [levelNode=null] - The level node.
+ * @param {?Node<float>} [biasNode=null] - The bias node.
+ * @returns {CubeTextureNode}
+ */
+const cubeTexture = ( value = EmptyTexture, uvNode = null, levelNode = null, biasNode = null ) => {
+
+	let textureNode;
+
+	if ( value && value.isCubeTextureNode === true ) {
+
+		textureNode = nodeObject( value.clone() );
+		textureNode.referenceNode = value.getSelf(); // Ensure the reference is set to the original node
+
+		if ( uvNode !== null ) textureNode.uvNode = nodeObject( uvNode );
+		if ( levelNode !== null ) textureNode.levelNode = nodeObject( levelNode );
+		if ( biasNode !== null ) textureNode.biasNode = nodeObject( biasNode );
+
+	} else {
+
+		textureNode = cubeTextureBase( value, uvNode, levelNode, biasNode );
+
+	}
+
+	return textureNode;
+
+};
+
+/**
+ * TSL function for creating a uniform cube texture node.
+ *
+ * @tsl
+ * @function
+ * @param {?CubeTexture} [value=EmptyTexture] - The cube texture.
+ * @returns {CubeTextureNode}
+ */
+const uniformCubeTexture = ( value = EmptyTexture ) => cubeTextureBase( value );
 
 // TODO: Avoid duplicated code and ues only ReferenceBaseNode or ReferenceNode
 
@@ -17482,6 +17578,238 @@ class VertexColorNode extends AttributeNode {
 const vertexColor = ( index = 0 ) => nodeObject( new VertexColorNode( index ) );
 
 /**
+ * Represents a "Color Burn" blend mode.
+ *
+ * It's designed to darken the base layer's colors based on the color of the blend layer.
+ * It significantly increases the contrast of the base layer, making the colors more vibrant and saturated.
+ * The darker the color in the blend layer, the stronger the darkening and contrast effect on the base layer.
+ *
+ * @tsl
+ * @function
+ * @param {Node<vec3>} base - The base color.
+ * @param {Node<vec3>} blend - The blend color. A white (#ffffff) blend color does not alter the base color.
+ * @return {Node<vec3>} The result.
+ */
+const blendBurn = /*@__PURE__*/ Fn( ( [ base, blend ] ) => {
+
+	return min$1( 1.0, base.oneMinus().div( blend ) ).oneMinus();
+
+} ).setLayout( {
+	name: 'blendBurn',
+	type: 'vec3',
+	inputs: [
+		{ name: 'base', type: 'vec3' },
+		{ name: 'blend', type: 'vec3' }
+	]
+} );
+
+/**
+ * Represents a "Color Dodge" blend mode.
+ *
+ * It's designed to lighten the base layer's colors based on the color of the blend layer.
+ * It significantly increases the brightness of the base layer, making the colors lighter and more vibrant.
+ * The brighter the color in the blend layer, the stronger the lightening and contrast effect on the base layer.
+ *
+ * @tsl
+ * @function
+ * @param {Node<vec3>} base - The base color.
+ * @param {Node<vec3>} blend - The blend color. A black (#000000) blend color does not alter the base color.
+ * @return {Node<vec3>} The result.
+ */
+const blendDodge = /*@__PURE__*/ Fn( ( [ base, blend ] ) => {
+
+	return min$1( base.div( blend.oneMinus() ), 1.0 );
+
+} ).setLayout( {
+	name: 'blendDodge',
+	type: 'vec3',
+	inputs: [
+		{ name: 'base', type: 'vec3' },
+		{ name: 'blend', type: 'vec3' }
+	]
+} );
+
+/**
+ * Represents a "Screen" blend mode.
+ *
+ * Similar to `blendDodge()`, this mode also lightens the base layer's colors based on the color of the blend layer.
+ * The "Screen" blend mode is better for general brightening whereas the "Dodge" results in more subtle and nuanced
+ * effects.
+ *
+ * @tsl
+ * @function
+ * @param {Node<vec3>} base - The base color.
+ * @param {Node<vec3>} blend - The blend color. A black (#000000) blend color does not alter the base color.
+ * @return {Node<vec3>} The result.
+ */
+const blendScreen = /*@__PURE__*/ Fn( ( [ base, blend ] ) => {
+
+	return base.oneMinus().mul( blend.oneMinus() ).oneMinus();
+
+} ).setLayout( {
+	name: 'blendScreen',
+	type: 'vec3',
+	inputs: [
+		{ name: 'base', type: 'vec3' },
+		{ name: 'blend', type: 'vec3' }
+	]
+} );
+
+/**
+ * Represents a "Overlay" blend mode.
+ *
+ * It's designed to increase the contrast of the base layer based on the color of the blend layer.
+ * It amplifies the existing colors and contrast in the base layer, making lighter areas lighter and darker areas darker.
+ * The color of the blend layer significantly influences the resulting contrast and color shift in the base layer.
+ *
+ * @tsl
+ * @function
+ * @param {Node<vec3>} base - The base color.
+ * @param {Node<vec3>} blend - The blend color
+ * @return {Node<vec3>} The result.
+ */
+const blendOverlay = /*@__PURE__*/ Fn( ( [ base, blend ] ) => {
+
+	return mix( base.mul( 2.0 ).mul( blend ), base.oneMinus().mul( 2.0 ).mul( blend.oneMinus() ).oneMinus(), step( 0.5, base ) );
+
+} ).setLayout( {
+	name: 'blendOverlay',
+	type: 'vec3',
+	inputs: [
+		{ name: 'base', type: 'vec3' },
+		{ name: 'blend', type: 'vec3' }
+	]
+} );
+
+/**
+ * This function blends two color based on their alpha values by replicating the behavior of `THREE.NormalBlending`.
+ * It assumes both input colors have non-premultiplied alpha.
+ *
+ * @tsl
+ * @function
+ * @param {Node<vec4>} base - The base color.
+ * @param {Node<vec4>} blend - The blend color
+ * @return {Node<vec4>} The result.
+ */
+const blendColor = /*@__PURE__*/ Fn( ( [ base, blend ] ) => {
+
+	const outAlpha = blend.a.add( base.a.mul( blend.a.oneMinus() ) );
+
+	return vec4( blend.rgb.mul( blend.a ).add( base.rgb.mul( base.a ).mul( blend.a.oneMinus() ) ).div( outAlpha ), outAlpha );
+
+} ).setLayout( {
+	name: 'blendColor',
+	type: 'vec4',
+	inputs: [
+		{ name: 'base', type: 'vec4' },
+		{ name: 'blend', type: 'vec4' }
+	]
+} );
+
+/**
+ * Premultiplies the RGB channels of a color by its alpha channel.
+ *
+ * This function is useful for converting a non-premultiplied alpha color
+ * into a premultiplied alpha format, where the RGB values are scaled
+ * by the alpha value. Premultiplied alpha is often used in graphics
+ * rendering for certain operations, such as compositing and image processing.
+ *
+ * @tsl
+ * @function
+ * @param {Node<vec4>} color - The input color with non-premultiplied alpha.
+ * @return {Node<vec4>} The color with premultiplied alpha.
+ */
+const premultiplyAlpha = /*@__PURE__*/ Fn( ( [ color ] ) => {
+
+	return vec4( color.rgb.mul( color.a ), color.a );
+
+}, { color: 'vec4', return: 'vec4' } );
+
+/**
+ * Unpremultiplies the RGB channels of a color by its alpha channel.
+ *
+ * This function is useful for converting a premultiplied alpha color
+ * back into a non-premultiplied alpha format, where the RGB values are
+ * divided by the alpha value. Unpremultiplied alpha is often used in graphics
+ * rendering for certain operations, such as compositing and image processing.
+ *
+ * @tsl
+ * @function
+ * @param {Node<vec4>} color - The input color with premultiplied alpha.
+ * @return {Node<vec4>} The color with non-premultiplied alpha.
+ */
+const unpremultiplyAlpha = /*@__PURE__*/ Fn( ( [ color ] ) => {
+
+	If( color.a.equal( 0.0 ), () => vec4( 0.0 ) );
+
+	return vec4( color.rgb.div( color.a ), color.a );
+
+}, { color: 'vec4', return: 'vec4' } );
+
+
+// Deprecated
+
+/**
+ * @tsl
+ * @function
+ * @deprecated since r171. Use {@link blendBurn} instead.
+ *
+ * @param {...any} params
+ * @returns {Function}
+ */
+const burn = ( ...params ) => { // @deprecated, r171
+
+	console.warn( 'THREE.TSL: "burn" has been renamed. Use "blendBurn" instead.' );
+	return blendBurn( params );
+
+};
+
+/**
+ * @tsl
+ * @function
+ * @deprecated since r171. Use {@link blendDodge} instead.
+ *
+ * @param {...any} params
+ * @returns {Function}
+ */
+const dodge = ( ...params ) => { // @deprecated, r171
+
+	console.warn( 'THREE.TSL: "dodge" has been renamed. Use "blendDodge" instead.' );
+	return blendDodge( params );
+
+};
+
+/**
+ * @tsl
+ * @function
+ * @deprecated since r171. Use {@link blendScreen} instead.
+ *
+ * @param {...any} params
+ * @returns {Function}
+ */
+const screen = ( ...params ) => { // @deprecated, r171
+
+	console.warn( 'THREE.TSL: "screen" has been renamed. Use "blendScreen" instead.' );
+	return blendScreen( params );
+
+};
+
+/**
+ * @tsl
+ * @function
+ * @deprecated since r171. Use {@link blendOverlay} instead.
+ *
+ * @param {...any} params
+ * @returns {Function}
+ */
+const overlay = ( ...params ) => { // @deprecated, r171
+
+	console.warn( 'THREE.TSL: "overlay" has been renamed. Use "blendOverlay" instead.' );
+	return blendOverlay( params );
+
+};
+
+/**
  * Base class for all node materials.
  *
  * @augments Material
@@ -18243,7 +18571,9 @@ class NodeMaterial extends Material {
 
 		if ( this.maskNode !== null ) {
 
-			bool( this.maskNode ).discard();
+			// Discard if the mask is `false`
+
+			bool( this.maskNode ).not().discard();
 
 		}
 
@@ -18532,6 +18862,19 @@ class NodeMaterial extends Material {
 	}
 
 	/**
+	 * Setups premultiplied alpha.
+	 *
+	 * @param {NodeBuilder} builder - The current node builder.
+	 * @param {Node<vec4>} outputNode - The existing output node.
+	 * @return {Node<vec4>} The output node.
+	 */
+	setupPremultipliedAlpha( builder, outputNode ) {
+
+		return premultiplyAlpha( outputNode );
+
+	}
+
+	/**
 	 * Setups the output node.
 	 *
 	 * @param {NodeBuilder} builder - The current node builder.
@@ -18545,6 +18888,14 @@ class NodeMaterial extends Material {
 		if ( this.fog === true ) {
 
 			outputNode = this.setupFog( builder, outputNode );
+
+		}
+
+		// PREMULTIPLIED ALPHA
+
+		if ( this.premultipliedAlpha === true ) {
+
+			outputNode = this.setupPremultipliedAlpha( builder, outputNode );
 
 		}
 
@@ -25889,6 +26240,16 @@ class RenderObject {
 		this.attributes = null;
 
 		/**
+		 * An object holding the version of the
+		 * attributes. The keys are the attribute names
+		 * and the values are the attribute versions.
+		 *
+		 * @type {?Object<string, number>}
+		 * @default null
+		 */
+		this.attributesId = null;
+
+		/**
 		 * A reference to a render pipeline the render
 		 * object is processed with.
 		 *
@@ -26007,7 +26368,7 @@ class RenderObject {
 
 		/**
 		 * An event listener which is executed when `dispose()` is called on
-		 * the render object's material.
+		 * the material of this render object.
 		 *
 		 * @method
 		 */
@@ -26017,7 +26378,23 @@ class RenderObject {
 
 		};
 
+		/**
+		 * An event listener which is executed when `dispose()` is called on
+		 * the geometry of this render object.
+		 *
+		 * @method
+		 */
+		this.onGeometryDispose = () => {
+
+			// clear geometry cache attributes
+
+			this.attributes = null;
+			this.attributesId = null;
+
+		};
+
 		this.material.addEventListener( 'dispose', this.onMaterialDispose );
+		this.geometry.addEventListener( 'dispose', this.onGeometryDispose );
 
 	}
 
@@ -26156,6 +26533,7 @@ class RenderObject {
 
 		this.geometry = geometry;
 		this.attributes = null;
+		this.attributesId = null;
 
 	}
 
@@ -26175,9 +26553,25 @@ class RenderObject {
 		const attributes = [];
 		const vertexBuffers = new Set();
 
+		const attributesId = {};
+
 		for ( const nodeAttribute of nodeAttributes ) {
 
-			const attribute = nodeAttribute.node && nodeAttribute.node.attribute ? nodeAttribute.node.attribute : geometry.getAttribute( nodeAttribute.name );
+			let attribute;
+
+			if ( nodeAttribute.node && nodeAttribute.node.attribute ) {
+
+				// node attribute
+				attribute = nodeAttribute.node.attribute;
+
+			} else {
+
+				// geometry attribute
+				attribute = geometry.getAttribute( nodeAttribute.name );
+
+				attributesId[ nodeAttribute.name ] = attribute.version;
+
+			}
 
 			if ( attribute === undefined ) continue;
 
@@ -26189,6 +26583,7 @@ class RenderObject {
 		}
 
 		this.attributes = attributes;
+		this.attributesId = attributesId;
 		this.vertexBuffers = Array.from( vertexBuffers.values() );
 
 		return attributes;
@@ -26453,7 +26848,27 @@ class RenderObject {
 	 */
 	get needsGeometryUpdate() {
 
-		return this.geometry.id !== this.object.geometry.id;
+		if ( this.geometry.id !== this.object.geometry.id ) return true;
+
+		if ( this.attributes !== null ) {
+
+			const attributesId = this.attributesId;
+
+			for ( const name in attributesId ) {
+
+				const attribute = this.geometry.getAttribute( name );
+
+				if ( attribute === undefined || attributesId[ name ] !== attribute.id ) {
+
+					return true;
+
+				}
+
+			}
+
+		}
+
+		return false;
 
 	}
 
@@ -26531,6 +26946,7 @@ class RenderObject {
 	dispose() {
 
 		this.material.removeEventListener( 'dispose', this.onMaterialDispose );
+		this.geometry.removeEventListener( 'dispose', this.onGeometryDispose );
 
 		this.onDispose();
 
@@ -33453,238 +33869,6 @@ function getPreviousMatrix( object, index = 0 ) {
 const velocity = /*@__PURE__*/ nodeImmutable( VelocityNode );
 
 /**
- * Represents a "Color Burn" blend mode.
- *
- * It's designed to darken the base layer's colors based on the color of the blend layer.
- * It significantly increases the contrast of the base layer, making the colors more vibrant and saturated.
- * The darker the color in the blend layer, the stronger the darkening and contrast effect on the base layer.
- *
- * @tsl
- * @function
- * @param {Node<vec3>} base - The base color.
- * @param {Node<vec3>} blend - The blend color. A white (#ffffff) blend color does not alter the base color.
- * @return {Node<vec3>} The result.
- */
-const blendBurn = /*@__PURE__*/ Fn( ( [ base, blend ] ) => {
-
-	return min$1( 1.0, base.oneMinus().div( blend ) ).oneMinus();
-
-} ).setLayout( {
-	name: 'blendBurn',
-	type: 'vec3',
-	inputs: [
-		{ name: 'base', type: 'vec3' },
-		{ name: 'blend', type: 'vec3' }
-	]
-} );
-
-/**
- * Represents a "Color Dodge" blend mode.
- *
- * It's designed to lighten the base layer's colors based on the color of the blend layer.
- * It significantly increases the brightness of the base layer, making the colors lighter and more vibrant.
- * The brighter the color in the blend layer, the stronger the lightening and contrast effect on the base layer.
- *
- * @tsl
- * @function
- * @param {Node<vec3>} base - The base color.
- * @param {Node<vec3>} blend - The blend color. A black (#000000) blend color does not alter the base color.
- * @return {Node<vec3>} The result.
- */
-const blendDodge = /*@__PURE__*/ Fn( ( [ base, blend ] ) => {
-
-	return min$1( base.div( blend.oneMinus() ), 1.0 );
-
-} ).setLayout( {
-	name: 'blendDodge',
-	type: 'vec3',
-	inputs: [
-		{ name: 'base', type: 'vec3' },
-		{ name: 'blend', type: 'vec3' }
-	]
-} );
-
-/**
- * Represents a "Screen" blend mode.
- *
- * Similar to `blendDodge()`, this mode also lightens the base layer's colors based on the color of the blend layer.
- * The "Screen" blend mode is better for general brightening whereas the "Dodge" results in more subtle and nuanced
- * effects.
- *
- * @tsl
- * @function
- * @param {Node<vec3>} base - The base color.
- * @param {Node<vec3>} blend - The blend color. A black (#000000) blend color does not alter the base color.
- * @return {Node<vec3>} The result.
- */
-const blendScreen = /*@__PURE__*/ Fn( ( [ base, blend ] ) => {
-
-	return base.oneMinus().mul( blend.oneMinus() ).oneMinus();
-
-} ).setLayout( {
-	name: 'blendScreen',
-	type: 'vec3',
-	inputs: [
-		{ name: 'base', type: 'vec3' },
-		{ name: 'blend', type: 'vec3' }
-	]
-} );
-
-/**
- * Represents a "Overlay" blend mode.
- *
- * It's designed to increase the contrast of the base layer based on the color of the blend layer.
- * It amplifies the existing colors and contrast in the base layer, making lighter areas lighter and darker areas darker.
- * The color of the blend layer significantly influences the resulting contrast and color shift in the base layer.
- *
- * @tsl
- * @function
- * @param {Node<vec3>} base - The base color.
- * @param {Node<vec3>} blend - The blend color
- * @return {Node<vec3>} The result.
- */
-const blendOverlay = /*@__PURE__*/ Fn( ( [ base, blend ] ) => {
-
-	return mix( base.mul( 2.0 ).mul( blend ), base.oneMinus().mul( 2.0 ).mul( blend.oneMinus() ).oneMinus(), step( 0.5, base ) );
-
-} ).setLayout( {
-	name: 'blendOverlay',
-	type: 'vec3',
-	inputs: [
-		{ name: 'base', type: 'vec3' },
-		{ name: 'blend', type: 'vec3' }
-	]
-} );
-
-/**
- * This function blends two color based on their alpha values by replicating the behavior of `THREE.NormalBlending`.
- * It assumes both input colors have non-premultiplied alpha.
- *
- * @tsl
- * @function
- * @param {Node<vec4>} base - The base color.
- * @param {Node<vec4>} blend - The blend color
- * @return {Node<vec4>} The result.
- */
-const blendColor = /*@__PURE__*/ Fn( ( [ base, blend ] ) => {
-
-	const outAlpha = blend.a.add( base.a.mul( blend.a.oneMinus() ) );
-
-	return vec4( blend.rgb.mul( blend.a ).add( base.rgb.mul( base.a ).mul( blend.a.oneMinus() ) ).div( outAlpha ), outAlpha );
-
-} ).setLayout( {
-	name: 'blendColor',
-	type: 'vec4',
-	inputs: [
-		{ name: 'base', type: 'vec4' },
-		{ name: 'blend', type: 'vec4' }
-	]
-} );
-
-/**
- * Premultiplies the RGB channels of a color by its alpha channel.
- *
- * This function is useful for converting a non-premultiplied alpha color
- * into a premultiplied alpha format, where the RGB values are scaled
- * by the alpha value. Premultiplied alpha is often used in graphics
- * rendering for certain operations, such as compositing and image processing.
- *
- * @tsl
- * @function
- * @param {Node<vec4>} color - The input color with non-premultiplied alpha.
- * @return {Node<vec4>} The color with premultiplied alpha.
- */
-const premult = /*@__PURE__*/ Fn( ( [ color ] ) => {
-
-	return vec4( color.rgb.mul( color.a ), color.a );
-
-}, { color: 'vec4', return: 'vec4' } );
-
-/**
- * Unpremultiplies the RGB channels of a color by its alpha channel.
- *
- * This function is useful for converting a premultiplied alpha color
- * back into a non-premultiplied alpha format, where the RGB values are
- * divided by the alpha value. Unpremultiplied alpha is often used in graphics
- * rendering for certain operations, such as compositing and image processing.
- *
- * @tsl
- * @function
- * @param {Node<vec4>} color - The input color with premultiplied alpha.
- * @return {Node<vec4>} The color with non-premultiplied alpha.
- */
-const unpremult = /*@__PURE__*/ Fn( ( [ color ] ) => {
-
-	If( color.a.equal( 0.0 ), () => vec4( 0.0 ) );
-
-	return vec4( color.rgb.div( color.a ), color.a );
-
-}, { color: 'vec4', return: 'vec4' } );
-
-
-// Deprecated
-
-/**
- * @tsl
- * @function
- * @deprecated since r171. Use {@link blendBurn} instead.
- *
- * @param {...any} params
- * @returns {Function}
- */
-const burn = ( ...params ) => { // @deprecated, r171
-
-	console.warn( 'THREE.TSL: "burn" has been renamed. Use "blendBurn" instead.' );
-	return blendBurn( params );
-
-};
-
-/**
- * @tsl
- * @function
- * @deprecated since r171. Use {@link blendDodge} instead.
- *
- * @param {...any} params
- * @returns {Function}
- */
-const dodge = ( ...params ) => { // @deprecated, r171
-
-	console.warn( 'THREE.TSL: "dodge" has been renamed. Use "blendDodge" instead.' );
-	return blendDodge( params );
-
-};
-
-/**
- * @tsl
- * @function
- * @deprecated since r171. Use {@link blendScreen} instead.
- *
- * @param {...any} params
- * @returns {Function}
- */
-const screen = ( ...params ) => { // @deprecated, r171
-
-	console.warn( 'THREE.TSL: "screen" has been renamed. Use "blendScreen" instead.' );
-	return blendScreen( params );
-
-};
-
-/**
- * @tsl
- * @function
- * @deprecated since r171. Use {@link blendOverlay} instead.
- *
- * @param {...any} params
- * @returns {Function}
- */
-const overlay = ( ...params ) => { // @deprecated, r171
-
-	console.warn( 'THREE.TSL: "overlay" has been renamed. Use "blendOverlay" instead.' );
-	return blendOverlay( params );
-
-};
-
-/**
  * Computes a grayscale value for the given RGB color value.
  *
  * @tsl
@@ -34455,13 +34639,6 @@ class PassNode extends TempNode {
 	setup( { renderer } ) {
 
 		this.renderTarget.samples = this.options.samples === undefined ? renderer.samples : this.options.samples;
-
-		// TODO: Disable MSAA for WebGL backend for now
-		if ( renderer.backend.isWebGLBackend === true ) {
-
-			this.renderTarget.samples = 0;
-
-		}
 
 		this.renderTarget.texture.type = renderer.getColorBufferType();
 
@@ -38017,17 +38194,6 @@ class ShadowBaseNode extends Node {
 
 	}
 
-	/**
-	 * Can be called when the shadow isn't required anymore. That can happen when
-	 * a lighting node stops casting shadows by setting {@link Object3D#castShadow}
-	 * to `false`.
-	 */
-	dispose() {
-
-		this.updateBeforeType = NodeUpdateType.NONE;
-
-	}
-
 }
 
 /**
@@ -40934,7 +41100,7 @@ const mx_worley_distance_1 = /*@__PURE__*/ Fn( ( [ p_immutable, x_immutable, y_i
 
 	If( metric.equal( int( 3 ) ), () => {
 
-		return max$1( max$1( abs( diff.x ), abs( diff.y ) ), abs( diff.z ) );
+		return max$1( abs( diff.x ), abs( diff.y ), abs( diff.z ) );
 
 	} );
 
@@ -41484,7 +41650,7 @@ const getParallaxCorrectNormal = /*@__PURE__*/ Fn( ( [ normal, cubeSize, cubePos
 	rbminmax.y = nDir.y.greaterThan( float( 0 ) ).select( rbmax.y, rbmin.y );
 	rbminmax.z = nDir.z.greaterThan( float( 0 ) ).select( rbmax.z, rbmin.z );
 
-	const correction = min$1( min$1( rbminmax.x, rbminmax.y ), rbminmax.z ).toVar();
+	const correction = min$1( rbminmax.x, rbminmax.y, rbminmax.z ).toVar();
 	const boxIntersection = positionWorld.add( nDir.mul( correction ) ).toVar();
 	return boxIntersection.sub( cubePos );
 
@@ -41651,6 +41817,7 @@ var TSL = /*#__PURE__*/Object.freeze({
 	cos: cos,
 	cross: cross,
 	cubeTexture: cubeTexture,
+	cubeTextureBase: cubeTextureBase,
 	cubeToUV: cubeToUV,
 	dFdx: dFdx,
 	dFdy: dFdy,
@@ -41915,7 +42082,7 @@ var TSL = /*#__PURE__*/Object.freeze({
 	pow2: pow2,
 	pow3: pow3,
 	pow4: pow4,
-	premult: premult,
+	premultiplyAlpha: premultiplyAlpha,
 	property: property,
 	radians: radians,
 	rand: rand,
@@ -42034,9 +42201,11 @@ var TSL = /*#__PURE__*/Object.freeze({
 	uint: uint,
 	uniform: uniform,
 	uniformArray: uniformArray,
+	uniformCubeTexture: uniformCubeTexture,
 	uniformGroup: uniformGroup,
+	uniformTexture: uniformTexture,
 	uniforms: uniforms,
-	unpremult: unpremult,
+	unpremultiplyAlpha: unpremultiplyAlpha,
 	userData: userData,
 	uv: uv,
 	uvec2: uvec2,
@@ -49090,10 +49259,11 @@ class XRRenderTarget extends RenderTarget {
 		 * are defined by external textures. This flag is
 		 * set to `true` when using the WebXR Layers API.
 		 *
+		 * @private
 		 * @type {boolean}
 		 * @default false
 		 */
-		this.hasExternalTextures = false;
+		this._hasExternalTextures = false;
 
 		/**
 		 * Whether a depth buffer should automatically be allocated
@@ -49106,10 +49276,25 @@ class XRRenderTarget extends RenderTarget {
 		 *
 		 * Reference: {@link https://www.w3.org/TR/webxrlayers-1/#dom-xrprojectionlayer-ignoredepthvalues}.
 		 *
+		 * @private
 		 * @type {boolean}
 		 * @default true
 		 */
-		this.autoAllocateDepthBuffer = true;
+		this._autoAllocateDepthBuffer = true;
+
+		/**
+		 * Whether this render target is associated with a XRWebGLLayer.
+		 *
+		 * A XRWebGLLayer points to an opaque framebuffer. Basically,
+		 * this means that you don't have access to its bound color,
+		 * stencil and depth buffers. We need to handle this framebuffer
+		 * differently since its textures are always bound.
+		 *
+		 * @private
+		 * @type {boolean}
+		 * @default false
+		 * */
+		this._isOpaqueFramebuffer = false;
 
 	}
 
@@ -49117,8 +49302,9 @@ class XRRenderTarget extends RenderTarget {
 
 		super.copy( source );
 
-		this.hasExternalTextures = source.hasExternalTextures;
-		this.autoAllocateDepthBuffer = source.autoAllocateDepthBuffer;
+		this._hasExternalTextures = source._hasExternalTextures;
+		this._autoAllocateDepthBuffer = source._autoAllocateDepthBuffer;
+		this._isOpaqueFramebuffer = source._isOpaqueFramebuffer;
 
 		return this;
 
@@ -49280,6 +49466,8 @@ class XRManager extends EventDispatcher {
 		 * @default false
 		 */
 		this._supportsLayers = false;
+
+		this._frameBufferTargets = null;
 
 		/**
 		 * Helper function to create native WebXR Layer.
@@ -49749,7 +49937,7 @@ class XRManager extends EventDispatcher {
 				resolveStencilBuffer: false
 			} );
 
-		renderTarget.autoAllocateDepthBuffer = true;
+		renderTarget._autoAllocateDepthBuffer = true;
 
 		const material = new MeshBasicMaterial( { color: 0xffffff, side: FrontSide } );
 		material.map = renderTarget.texture;
@@ -49840,7 +50028,7 @@ class XRManager extends EventDispatcher {
 				resolveStencilBuffer: false
 			} );
 
-		renderTarget.autoAllocateDepthBuffer = true;
+		renderTarget._autoAllocateDepthBuffer = true;
 
 		const material = new MeshBasicMaterial( { color: 0xffffff, side: BackSide } );
 		material.map = renderTarget.texture;
@@ -49900,44 +50088,70 @@ class XRManager extends EventDispatcher {
 
 		const translationObject = new Vector3();
 		const quaternionObject = new Quaternion();
+		const renderer = this._renderer;
 
 		const wasPresenting = this.isPresenting;
-		const rendererOutputTarget = this._renderer.getOutputRenderTarget();
-		const rendererFramebufferTarget = this._renderer._frameBufferTarget;
+		const rendererOutputTarget = renderer.getOutputRenderTarget();
+		const rendererFramebufferTarget = renderer._frameBufferTarget;
 		this.isPresenting = false;
+
+		const rendererSize = new Vector2();
+		renderer.getSize( rendererSize );
+		const rendererQuad = renderer._quad;
 
 		for ( const layer of this._layers ) {
 
 			layer.renderTarget.isXRRenderTarget = this._session !== null;
-			layer.renderTarget.hasExternalTextures = layer.renderTarget.isXRRenderTarget;
+			layer.renderTarget._hasExternalTextures = layer.renderTarget.isXRRenderTarget;
 
 			if ( layer.renderTarget.isXRRenderTarget && this._supportsLayers ) {
 
 				layer.xrlayer.transform = new XRRigidTransform( layer.plane.getWorldPosition( translationObject ), layer.plane.getWorldQuaternion( quaternionObject ) );
 
 				const glSubImage = this._glBinding.getSubImage( layer.xrlayer, this._xrFrame );
-				this._renderer.backend.setXRRenderTargetTextures(
+				renderer.backend.setXRRenderTargetTextures(
 					layer.renderTarget,
 					glSubImage.colorTexture,
 					undefined );
 
-				this._renderer.setOutputRenderTarget( layer.renderTarget );
-				this._renderer.setRenderTarget( null );
+				renderer._setXRLayerSize( layer.renderTarget.width, layer.renderTarget.height );
+				renderer.setOutputRenderTarget( layer.renderTarget );
+				renderer.setRenderTarget( null );
+				renderer._frameBufferTarget = null;
+
+				this._frameBufferTargets || ( this._frameBufferTargets = new WeakMap() );
+				const { frameBufferTarget, quad } = this._frameBufferTargets.get( layer.renderTarget ) || { frameBufferTarget: null, quad: null };
+				if ( ! frameBufferTarget ) {
+
+					renderer._quad = new QuadMesh( new NodeMaterial() );
+					this._frameBufferTargets.set( layer.renderTarget, { frameBufferTarget: renderer._getFrameBufferTarget(), quad: renderer._quad } );
+
+				} else {
+
+					renderer._frameBufferTarget = frameBufferTarget;
+					renderer._quad = quad;
+
+				}
+
+				layer.rendercall();
+
+				renderer._frameBufferTarget = null;
 
 			} else {
 
-				this._renderer.setRenderTarget( layer.renderTarget );
+				renderer.setRenderTarget( layer.renderTarget );
+				layer.rendercall();
 
 			}
 
-			layer.rendercall();
-
 		}
 
+		renderer.setRenderTarget( null );
+		renderer.setOutputRenderTarget( rendererOutputTarget );
+		renderer._frameBufferTarget = rendererFramebufferTarget;
+		renderer._setXRLayerSize( rendererSize.x, rendererSize.y );
+		renderer._quad = rendererQuad;
 		this.isPresenting = wasPresenting;
-		this._renderer.setRenderTarget( null );
-		this._renderer.setOutputRenderTarget( rendererOutputTarget );
-		this._renderer._frameBufferTarget = rendererFramebufferTarget;
 
 	}
 
@@ -50016,7 +50230,8 @@ class XRManager extends EventDispatcher {
 				const projectionlayerInit = {
 					colorFormat: gl.RGBA8,
 					depthFormat: glDepthFormat,
-					scaleFactor: this._framebufferScaleFactor
+					scaleFactor: this._framebufferScaleFactor,
+					clearOnAccess: false
 				};
 
 				if ( this._useMultiviewIfPossible && renderer.hasFeature( 'OVR_multiview2' ) ) {
@@ -50034,7 +50249,7 @@ class XRManager extends EventDispatcher {
 				this._glProjLayer = glProjLayer;
 
 				renderer.setPixelRatio( 1 );
-				renderer.setSize( glProjLayer.textureWidth, glProjLayer.textureHeight, false );
+				renderer._setXRLayerSize( glProjLayer.textureWidth, glProjLayer.textureHeight );
 
 				const depth = this._useMultiview ? 2 : 1;
 				const depthTexture = new DepthTexture( glProjLayer.textureWidth, glProjLayer.textureHeight, depthType, undefined, undefined, undefined, undefined, undefined, undefined, depthFormat, depth );
@@ -50055,7 +50270,7 @@ class XRManager extends EventDispatcher {
 						multiview: this._useMultiview
 					} );
 
-				this._xrRenderTarget.hasExternalTextures = true;
+				this._xrRenderTarget._hasExternalTextures = true;
 				this._xrRenderTarget.depth = this._useMultiview ? 2 : 1;
 
 				this._supportsLayers = session.enabledFeatures.includes( 'layers' );
@@ -50102,7 +50317,7 @@ class XRManager extends EventDispatcher {
 				session.updateRenderState( { baseLayer: glBaseLayer } );
 
 				renderer.setPixelRatio( 1 );
-				renderer.setSize( glBaseLayer.framebufferWidth, glBaseLayer.framebufferHeight, false );
+				renderer._setXRLayerSize( glBaseLayer.framebufferWidth, glBaseLayer.framebufferHeight );
 
 				this._xrRenderTarget = new XRRenderTarget(
 					glBaseLayer.framebufferWidth,
@@ -50117,6 +50332,7 @@ class XRManager extends EventDispatcher {
 					}
 				);
 
+				this._xrRenderTarget._isOpaqueFramebuffer = true;
 				this._referenceSpace = await session.requestReferenceSpace( this.getReferenceSpaceType() );
 
 			}
@@ -50565,7 +50781,8 @@ function createXRLayer( layer ) {
 			height: layer.height / 2,
 			space: this._referenceSpace,
 			viewPixelWidth: layer.pixelwidth,
-			viewPixelHeight: layer.pixelheight
+			viewPixelHeight: layer.pixelheight,
+			clearOnAccess: false
 		} );
 
 	} else {
@@ -50577,7 +50794,8 @@ function createXRLayer( layer ) {
 			aspectRatio: layer.aspectRatio,
 			space: this._referenceSpace,
 			viewPixelWidth: layer.pixelwidth,
-			viewPixelHeight: layer.pixelheight
+			viewPixelHeight: layer.pixelheight,
+			clearOnAccess: false
 		} );
 
 	}
@@ -50714,7 +50932,7 @@ function onAnimationFrame( time, frame ) {
 }
 
 const _scene = /*@__PURE__*/ new Scene();
-const _drawingBufferSize = /*@__PURE__*/ new Vector2();
+const _drawingBufferSize$1 = /*@__PURE__*/ new Vector2();
 const _screen = /*@__PURE__*/ new Vector4();
 const _frustum = /*@__PURE__*/ new Frustum();
 const _frustumArray = /*@__PURE__*/ new FrustumArray();
@@ -51896,7 +52114,7 @@ class Renderer {
 
 		if ( useToneMapping === false && useColorSpace === false ) return null;
 
-		const { width, height } = this.getDrawingBufferSize( _drawingBufferSize );
+		const { width, height } = this.getDrawingBufferSize( _drawingBufferSize$1 );
 		const { depth, stencil } = this;
 
 		let frameBufferTarget = this._frameBufferTarget;
@@ -51925,13 +52143,24 @@ class Renderer {
 
 		frameBufferTarget.depthBuffer = depth;
 		frameBufferTarget.stencilBuffer = stencil;
-		frameBufferTarget.setSize( width, height, outputRenderTarget !== null ? outputRenderTarget.depth : 1 );
+		if ( outputRenderTarget !== null ) {
+
+			frameBufferTarget.setSize( outputRenderTarget.width, outputRenderTarget.height, outputRenderTarget.depth );
+
+		} else {
+
+			frameBufferTarget.setSize( width, height, 1 );
+
+		}
+
 		frameBufferTarget.viewport.copy( this._viewport );
 		frameBufferTarget.scissor.copy( this._scissor );
 		frameBufferTarget.viewport.multiplyScalar( this._pixelRatio );
 		frameBufferTarget.scissor.multiplyScalar( this._pixelRatio );
 		frameBufferTarget.scissorTest = this._scissorTest;
 		frameBufferTarget.multiview = outputRenderTarget !== null ? outputRenderTarget.multiview : false;
+		frameBufferTarget.resolveDepthBuffer = outputRenderTarget !== null ? outputRenderTarget.resolveDepthBuffer : true;
+		frameBufferTarget._autoAllocateDepthBuffer = outputRenderTarget !== null ? outputRenderTarget._autoAllocateDepthBuffer : false;
 
 		return frameBufferTarget;
 
@@ -52050,9 +52279,9 @@ class Renderer {
 
 		}
 
-		this.getDrawingBufferSize( _drawingBufferSize );
+		this.getDrawingBufferSize( _drawingBufferSize$1 );
 
-		_screen.set( 0, 0, _drawingBufferSize.width, _drawingBufferSize.height );
+		_screen.set( 0, 0, _drawingBufferSize$1.width, _drawingBufferSize$1.height );
 
 		const minDepth = ( viewport.minDepth === undefined ) ? 0 : viewport.minDepth;
 		const maxDepth = ( viewport.maxDepth === undefined ) ? 1 : viewport.maxDepth;
@@ -52184,6 +52413,15 @@ class Renderer {
 		//
 
 		return renderContext;
+
+	}
+
+	_setXRLayerSize( width, height ) {
+
+		this._width = width;
+		this._height = height;
+
+		this.setViewport( 0, 0, width, height );
 
 	}
 
@@ -54774,9 +55012,7 @@ const interpolationTypeMap = {
 };
 
 const interpolationModeMap = {
-	'centroid': 'centroid',
-	'flat first': 'flat',
-	'flat either': 'flat'
+	'centroid': 'centroid'
 };
 
 const defaultPrecisions = `
@@ -59079,25 +59315,6 @@ class WebGLTextureUtils {
 		if ( texture.isRenderTargetTexture || ( textureGPU === undefined /* unsupported texture format */ ) )
 			return;
 
-		const getImage = ( source ) => {
-
-			if ( source.isDataTexture ) {
-
-				return source.image.data;
-
-			} else if ( ( typeof HTMLImageElement !== 'undefined' && source instanceof HTMLImageElement ) ||
-				( typeof HTMLCanvasElement !== 'undefined' && source instanceof HTMLCanvasElement ) ||
-				( typeof ImageBitmap !== 'undefined' && source instanceof ImageBitmap ) ||
-				source instanceof OffscreenCanvas ) {
-
-				return source;
-
-			}
-
-			return source.data;
-
-		};
-
 		this.backend.state.bindTexture( glTextureType, textureGPU );
 
 		this.setTextureParameters( glTextureType, texture );
@@ -59622,6 +59839,8 @@ class WebGLTextureUtils {
 
 		}
 
+		gl.bindRenderbuffer( gl.RENDERBUFFER, null );
+
 	}
 
 	/**
@@ -59733,6 +59952,25 @@ class WebGLTextureUtils {
 		if ( glFormat === gl.ALPHA ) return bytesPerComponent;
 
 	}
+
+}
+
+function getImage( source ) {
+
+	if ( source.isDataTexture ) {
+
+		return source.image.data;
+
+	} else if ( ( typeof HTMLImageElement !== 'undefined' && source instanceof HTMLImageElement ) ||
+		( typeof HTMLCanvasElement !== 'undefined' && source instanceof HTMLCanvasElement ) ||
+		( typeof ImageBitmap !== 'undefined' && source instanceof ImageBitmap ) ||
+		( typeof OffscreenCanvas !== 'undefined' && source instanceof OffscreenCanvas ) ) {
+
+		return source;
+
+	}
+
+	return source.data;
 
 }
 
@@ -60495,6 +60733,8 @@ class WebGLTimestampQueryPool extends TimestampQueryPool {
 
 }
 
+const _drawingBufferSize = /*@__PURE__*/ new Vector2();
+
 /**
  * A backend implementation targeting WebGL 2.
  *
@@ -60841,13 +61081,13 @@ class WebGLBackend extends Backend {
 
 			// The multisample_render_to_texture extension doesn't work properly if there
 			// are midframe flushes and an external depth texture.
-			if ( ( this.extensions.has( 'WEBGL_multisampled_render_to_texture' ) === true ) && renderTarget.autoAllocateDepthBuffer === true && renderTarget.multiview === false ) {
+			if ( ( this.extensions.has( 'WEBGL_multisampled_render_to_texture' ) === true ) && renderTarget._autoAllocateDepthBuffer === true && renderTarget.multiview === false ) {
 
 				console.warn( 'THREE.WebGLBackend: Render-to-texture extension was disabled because an external texture was provided' );
 
 			}
 
-			renderTarget.autoAllocateDepthBuffer = false;
+			renderTarget._autoAllocateDepthBuffer = false;
 
 		}
 
@@ -60921,7 +61161,7 @@ class WebGLBackend extends Backend {
 	 */
 	beginRender( renderContext ) {
 
-		const { state, gl } = this;
+		const { state } = this;
 		const renderContextData = this.get( renderContext );
 
 		//
@@ -60932,7 +61172,8 @@ class WebGLBackend extends Backend {
 
 		} else {
 
-			state.viewport( 0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight );
+			const { width, height } = this.getDrawingBufferSize( _drawingBufferSize );
+			state.viewport( 0, 0, width, height );
 
 		}
 
@@ -60952,9 +61193,7 @@ class WebGLBackend extends Backend {
 		this._currentContext = renderContext;
 
 		this._setFramebuffer( renderContext );
-
 		this.clear( renderContext.clearColor, renderContext.clearDepth, renderContext.clearStencil, renderContext, false );
-
 
 		const occlusionQueryCount = renderContext.occlusionQueryCount;
 
@@ -61021,29 +61260,60 @@ class WebGLBackend extends Backend {
 		}
 
 		this._currentContext = previousContext;
+		const renderTarget = renderContext.renderTarget;
 
-		if ( renderContext.textures !== null && renderContext.renderTarget ) {
+		if ( renderContext.textures !== null && renderTarget ) {
 
-			const renderTargetContextData = this.get( renderContext.renderTarget );
+			const renderTargetContextData = this.get( renderTarget );
 
-			const { samples } = renderContext.renderTarget;
-
-			if ( samples > 0 && this._useMultisampledExtension( renderContext.renderTarget ) === false ) {
+			if ( renderTarget.samples > 0 && this._useMultisampledExtension( renderTarget ) === false ) {
 
 				const fb = renderTargetContextData.framebuffers[ renderContext.getCacheKey() ];
 
-				const mask = gl.COLOR_BUFFER_BIT;
+				let mask = gl.COLOR_BUFFER_BIT;
+
+				if ( renderTarget.resolveDepthBuffer ) {
+
+					if ( renderTarget.depthBuffer ) mask |= gl.DEPTH_BUFFER_BIT;
+					if ( renderTarget.stencilBuffer && renderTarget.resolveStencilBuffer ) mask |= gl.STENCIL_BUFFER_BIT;
+
+				}
 
 				const msaaFrameBuffer = renderTargetContextData.msaaFrameBuffer;
+				const msaaRenderbuffers = renderTargetContextData.msaaRenderbuffers;
 
 				const textures = renderContext.textures;
+				const isMRT = textures.length > 1;
 
 				state.bindFramebuffer( gl.READ_FRAMEBUFFER, msaaFrameBuffer );
 				state.bindFramebuffer( gl.DRAW_FRAMEBUFFER, fb );
 
+				if ( isMRT ) {
+
+					// blitFramebuffer() can only copy/resolve the first color attachment of a framebuffer. When using MRT,
+					// the engine temporarily removes all attachments and then configures each attachment for the resolve.
+
+					for ( let i = 0; i < textures.length; i ++ ) {
+
+						gl.framebufferRenderbuffer( gl.READ_FRAMEBUFFER, gl.COLOR_ATTACHMENT0 + i, gl.RENDERBUFFER, null );
+						gl.framebufferTexture2D( gl.DRAW_FRAMEBUFFER, gl.COLOR_ATTACHMENT0 + i, gl.TEXTURE_2D, null, 0 );
+
+					}
+
+				}
+
 				for ( let i = 0; i < textures.length; i ++ ) {
 
-					// TODO Add support for MRT
+					if ( isMRT ) {
+
+						// configure attachment for resolve
+
+						const { textureGPU } = this.get( textures[ i ] );
+
+						gl.framebufferRenderbuffer( gl.READ_FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.RENDERBUFFER, msaaRenderbuffers[ i ] );
+						gl.framebufferTexture2D( gl.DRAW_FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, textureGPU, 0 );
+
+					}
 
 					if ( renderContext.scissor ) {
 
@@ -61073,8 +61343,28 @@ class WebGLBackend extends Backend {
 
 				}
 
-			}
+				if ( isMRT ) {
 
+					// restore attachments
+
+					for ( let i = 0; i < textures.length; i ++ ) {
+
+						const { textureGPU } = this.get( textures[ i ] );
+
+						gl.framebufferRenderbuffer( gl.READ_FRAMEBUFFER, gl.COLOR_ATTACHMENT0 + i, gl.RENDERBUFFER, msaaRenderbuffers[ i ] );
+						gl.framebufferTexture2D( gl.DRAW_FRAMEBUFFER, gl.COLOR_ATTACHMENT0 + i, gl.TEXTURE_2D, textureGPU, 0 );
+
+					}
+
+				}
+
+			} else if ( renderTarget.resolveDepthBuffer === false && renderTargetContextData.framebuffers ) {
+
+				const fb = renderTargetContextData.framebuffers[ renderContext.getCacheKey() ];
+				state.bindFramebuffer( gl.DRAW_FRAMEBUFFER, fb );
+				gl.invalidateFramebuffer( gl.DRAW_FRAMEBUFFER, renderTargetContextData.depthInvalidationArray );
+
+			}
 
 		}
 
@@ -61088,7 +61378,8 @@ class WebGLBackend extends Backend {
 
 			} else {
 
-				state.viewport( 0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight );
+				const { width, height } = this.getDrawingBufferSize( _drawingBufferSize );
+				state.viewport( 0, 0, width, height );
 
 			}
 
@@ -61368,7 +61659,7 @@ class WebGLBackend extends Backend {
 
 		if ( vaoGPU === undefined ) {
 
-			this._createVao( attributes );
+			this.vaoCache[ vaoKey ] = this._createVao( attributes );
 
 		} else {
 
@@ -61404,7 +61695,7 @@ class WebGLBackend extends Backend {
 
 			const dualAttributeData = transformBuffers[ i ];
 
-			if ( dualAttributeData.pbo ) {
+			if ( dualAttributeData.pbo && this.has( dualAttributeData.pbo ) ) {
 
 				this.textureUtils.copyBufferToTexture( dualAttributeData.transformBuffer, dualAttributeData.pbo );
 
@@ -61486,28 +61777,23 @@ class WebGLBackend extends Backend {
 
 		// vertex state
 
-		const renderObjectData = this.get( renderObject );
+		const attributes = renderObject.getAttributes();
+		const attributesData = this.get( attributes );
 
-		let vaoGPU = renderObjectData.staticVao;
+		let vaoGPU = attributesData.vaoGPU;
 
-		if ( vaoGPU === undefined || renderObjectData.geometryId !== renderObject.geometry.id ) {
+		if ( vaoGPU === undefined ) {
 
-			const vaoKey = this._getVaoKey( renderObject.getAttributes() );
+			const vaoKey = this._getVaoKey( attributes );
 
 			vaoGPU = this.vaoCache[ vaoKey ];
 
 			if ( vaoGPU === undefined ) {
 
-				let staticVao;
+				vaoGPU = this._createVao( attributes );
 
-				( { vaoGPU, staticVao } = this._createVao( renderObject.getAttributes() ) );
-
-				if ( staticVao ) {
-
-					renderObjectData.staticVao = vaoGPU;
-					renderObjectData.geometryId = renderObject.geometry.id;
-
-				}
+				this.vaoCache[ vaoKey ] = vaoGPU;
+				attributesData.vaoGPU = vaoGPU;
 
 			}
 
@@ -62474,7 +62760,7 @@ class WebGLBackend extends Backend {
 			const isRenderTarget3D = renderTarget.isRenderTarget3D === true;
 			const isRenderTargetArray = renderTarget.depth > 1;
 			const isXRRenderTarget = renderTarget.isXRRenderTarget === true;
-			const hasExternalTextures = ( isXRRenderTarget === true && renderTarget.hasExternalTextures === true );
+			const _hasExternalTextures = ( isXRRenderTarget === true && renderTarget._hasExternalTextures === true );
 
 			let msaaFb = renderTargetContextData.msaaFrameBuffer;
 			let depthRenderbuffer = renderTargetContextData.depthRenderbuffer;
@@ -62491,7 +62777,7 @@ class WebGLBackend extends Backend {
 
 				fb = renderTargetContextData.cubeFramebuffers[ cacheKey ];
 
-			} else if ( isXRRenderTarget && hasExternalTextures === false ) {
+			} else if ( isXRRenderTarget && _hasExternalTextures === false ) {
 
 				fb = this._xrFramebuffer;
 
@@ -62510,6 +62796,7 @@ class WebGLBackend extends Backend {
 				state.bindFramebuffer( gl.FRAMEBUFFER, fb );
 
 				const textures = descriptor.textures;
+				const depthInvalidationArray = [];
 
 				if ( isCube ) {
 
@@ -62546,7 +62833,7 @@ class WebGLBackend extends Backend {
 
 						} else {
 
-							if ( hasExternalTextures && useMultisampledRTT ) {
+							if ( useMultisampledRTT ) {
 
 								multisampledRTTExt.framebufferTexture2DMultisampleEXT( gl.FRAMEBUFFER, attachment, gl.TEXTURE_2D, textureData.textureGPU, 0, samples );
 
@@ -62560,22 +62847,28 @@ class WebGLBackend extends Backend {
 
 					}
 
-					state.drawBuffers( descriptor, fb );
-
 				}
 
-				if ( renderTarget.isXRRenderTarget && renderTarget.autoAllocateDepthBuffer === true ) {
+				const depthStyle = stencilBuffer ? gl.DEPTH_STENCIL_ATTACHMENT : gl.DEPTH_ATTACHMENT;
+
+				if ( renderTarget._autoAllocateDepthBuffer === true ) {
 
 					const renderbuffer = gl.createRenderbuffer();
 					this.textureUtils.setupRenderBufferStorage( renderbuffer, descriptor, 0, useMultisampledRTT );
 					renderTargetContextData.xrDepthRenderbuffer = renderbuffer;
+					depthInvalidationArray.push( stencilBuffer ? gl.DEPTH_STENCIL_ATTACHMENT : gl.DEPTH_ATTACHMENT );
+
+					gl.bindRenderbuffer( gl.RENDERBUFFER, renderbuffer );
+					gl.framebufferRenderbuffer( gl.FRAMEBUFFER, depthStyle, gl.RENDERBUFFER, renderbuffer );
+
 
 				} else {
 
 					if ( descriptor.depthTexture !== null ) {
 
+						depthInvalidationArray.push( stencilBuffer ? gl.DEPTH_STENCIL_ATTACHMENT : gl.DEPTH_ATTACHMENT );
+
 						const textureData = this.get( descriptor.depthTexture );
-						const depthStyle = stencilBuffer ? gl.DEPTH_STENCIL_ATTACHMENT : gl.DEPTH_ATTACHMENT;
 						textureData.renderTarget = descriptor.renderTarget;
 						textureData.cacheKey = cacheKey; // required for copyTextureToTexture()
 
@@ -62583,7 +62876,7 @@ class WebGLBackend extends Backend {
 
 							multiviewExt.framebufferTextureMultisampleMultiviewOVR( gl.FRAMEBUFFER, depthStyle, textureData.textureGPU, 0, samples, 0, 2 );
 
-						} else if ( hasExternalTextures && useMultisampledRTT ) {
+						} else if ( _hasExternalTextures && useMultisampledRTT ) {
 
 							multisampledRTTExt.framebufferTexture2DMultisampleEXT( gl.FRAMEBUFFER, depthStyle, gl.TEXTURE_2D, textureData.textureGPU, 0, samples );
 
@@ -62606,6 +62899,9 @@ class WebGLBackend extends Backend {
 					}
 
 				}
+
+				renderTargetContextData.depthInvalidationArray = depthInvalidationArray;
+
 
 			} else {
 
@@ -62631,7 +62927,7 @@ class WebGLBackend extends Backend {
 
 				// rebind external XR textures
 
-				if ( ( isXRRenderTarget && hasExternalTextures ) || renderTarget.multiview ) {
+				if ( ( isXRRenderTarget || useMultisampledRTT || renderTarget.multiview ) && ( renderTarget._isOpaqueFramebuffer !== true ) ) {
 
 					state.bindFramebuffer( gl.FRAMEBUFFER, fb );
 
@@ -62657,7 +62953,7 @@ class WebGLBackend extends Backend {
 
 					const depthStyle = stencilBuffer ? gl.DEPTH_STENCIL_ATTACHMENT : gl.DEPTH_ATTACHMENT;
 
-					if ( renderTarget.autoAllocateDepthBuffer === true ) {
+					if ( renderTarget._autoAllocateDepthBuffer === true ) {
 
 						const renderbuffer = renderTargetContextData.xrDepthRenderbuffer;
 						gl.bindRenderbuffer( gl.RENDERBUFFER, renderbuffer );
@@ -62725,6 +63021,8 @@ class WebGLBackend extends Backend {
 
 					}
 
+					gl.bindRenderbuffer( gl.RENDERBUFFER, null );
+
 					renderTargetContextData.msaaFrameBuffer = msaaFb;
 					renderTargetContextData.msaaRenderbuffers = msaaRenderbuffers;
 
@@ -62751,6 +63049,8 @@ class WebGLBackend extends Backend {
 				currentFrameBuffer = fb;
 
 			}
+
+			state.drawBuffers( descriptor, fb );
 
 		}
 
@@ -62793,9 +63093,6 @@ class WebGLBackend extends Backend {
 		const { gl } = this;
 
 		const vaoGPU = gl.createVertexArray();
-		let key = '';
-
-		let staticVao = true;
 
 		gl.bindVertexArray( vaoGPU );
 
@@ -62804,12 +63101,8 @@ class WebGLBackend extends Backend {
 			const attribute = attributes[ i ];
 			const attributeData = this.get( attribute );
 
-			key += ':' + attributeData.id;
-
 			gl.bindBuffer( gl.ARRAY_BUFFER, attributeData.bufferGPU );
 			gl.enableVertexAttribArray( i );
-
-			if ( attribute.isStorageBufferAttribute || attribute.isStorageInstancedBufferAttribute ) staticVao = false;
 
 			let stride, offset;
 
@@ -62849,9 +63142,7 @@ class WebGLBackend extends Backend {
 
 		gl.bindBuffer( gl.ARRAY_BUFFER, null );
 
-		this.vaoCache[ key ] = vaoGPU;
-
-		return { vaoGPU, staticVao };
+		return vaoGPU;
 
 	}
 
@@ -62988,7 +63279,7 @@ class WebGLBackend extends Backend {
 
 		}
 
-		return renderTarget.samples > 0 && this.extensions.has( 'WEBGL_multisampled_render_to_texture' ) === true && renderTarget.autoAllocateDepthBuffer !== false;
+		return renderTarget.samples > 0 && this.extensions.has( 'WEBGL_multisampled_render_to_texture' ) === true && renderTarget._autoAllocateDepthBuffer !== false;
 
 	}
 
@@ -63195,7 +63486,7 @@ const GPUBlendFactor = {
 	SrcAlpha: 'src-alpha',
 	OneMinusSrcAlpha: 'one-minus-src-alpha',
 	Dst: 'dst',
-	OneMinusDstColor: 'one-minus-dst',
+	OneMinusDst: 'one-minus-dst',
 	DstAlpha: 'dst-alpha',
 	OneMinusDstAlpha: 'one-minus-dst-alpha',
 	SrcAlphaSaturated: 'src-alpha-saturated',
@@ -69302,7 +69593,7 @@ class WebGPUPipelineUtils {
 				break;
 
 			case OneMinusDstColorFactor:
-				blendFactor = GPUBlendFactor.OneMinusDstColor;
+				blendFactor = GPUBlendFactor.OneMinusDst;
 				break;
 
 			case DstAlphaFactor:

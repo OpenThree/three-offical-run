@@ -3,7 +3,7 @@
  * Copyright 2010-2025 Three.js Authors
  * SPDX-License-Identifier: MIT
  */
-const REVISION = '177dev';
+const REVISION = '178dev';
 
 /**
  * Represents mouse buttons and interaction types in context of controls.
@@ -1617,8 +1617,8 @@ const InterpolationSamplingMode = {
 	NORMAL: 'normal',
 	CENTROID: 'centroid',
 	SAMPLE: 'sample',
-	FLAT_FIRST: 'flat first',
-	FLAT_EITHER: 'flat either'
+	FIRST: 'first',
+	EITHER: 'either'
 };
 
 /**
@@ -11003,6 +11003,8 @@ class Ray {
 	 * @return {boolean} Whether this ray intersects with the given sphere or not.
 	 */
 	intersectsSphere( sphere ) {
+
+		if ( sphere.radius < 0 ) return false; // handle empty spheres, see #31187
 
 		return this.distanceSqToPoint( sphere.center ) <= ( sphere.radius * sphere.radius );
 
