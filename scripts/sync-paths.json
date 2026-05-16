@@ -1,0 +1,10 @@
+[
+  "build",
+  "examples/fonts",
+  "examples/jsm",
+  "examples/luts",
+  "examples/materialx",
+  "examples/models",
+  "examples/sounds",
+  "examples/textures"
+]

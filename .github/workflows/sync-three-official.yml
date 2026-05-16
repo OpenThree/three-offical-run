@@ -1,0 +1,66 @@
+# 每周从 mrdoob/three.js 官方仓库同步下列目录（完整替换），其余仓库文件不动：
+#   build, examples/fonts, jsm, luts, materialx, models, sounds, textures
+# 路径清单见 scripts/sync-paths.json
+name: Sync three.js official
+
+on:
+  schedule:
+    # 每周一 02:00 UTC（北京时间周一 10:00）
+    - cron: '0 2 * * 1'
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'three.js 分支（默认 dev）'
+        required: false
+        default: dev
+        type: string
+
+concurrency:
+  group: sync-three-official
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Sync from official three.js
+        env:
+          THREE_SYNC_BRANCH: ${{ github.event.inputs.branch || 'dev' }}
+        run: node scripts/sync-three-official.mjs
+
+      - name: Read REVISION
+        id: meta
+        run: |
+          REV=$(grep -m1 "const REVISION" build/three.core.js | sed "s/.*'\([^']*\)'.*/\1/")
+          echo "revision=${REV}" >> "$GITHUB_OUTPUT"
+
+      - name: Verify only allowed directories changed
+        run: node scripts/verify-sync-paths.mjs
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          PATHS=$(node -p "JSON.parse(require('fs').readFileSync('scripts/sync-paths.json','utf8')).join(' ')")
+          # shellcheck disable=SC2086
+          git add -- $PATHS
+
+          if git diff --staged --quiet; then
+            echo "已与官方一致，无需提交。"
+            exit 0
+          fi
+
+          git commit -m "chore: sync three.js official (${{ steps.meta.outputs.revision }})"
+          git push
