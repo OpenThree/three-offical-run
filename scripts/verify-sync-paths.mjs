@@ -1,19 +1,16 @@
 #!/usr/bin/env node
 /**
  * 确认工作区变更仅发生在 sync-paths.json 列出的目录内。
- * 用于 GitHub Actions，防止误改 examples/index.html、assets 等自有内容。
  */
 
 import { spawnSync } from 'node:child_process';
-import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { loadSyncPaths } from './load-sync-paths.mjs';
 
 const __dirname = path.dirname( fileURLToPath( import.meta.url ) );
 const ROOT = path.resolve( __dirname, '..' );
-const ALLOWED = JSON.parse(
-	fs.readFileSync( path.join( __dirname, 'sync-paths.json' ), 'utf8' ),
-);
+const ALLOWED = loadSyncPaths();
 
 function isUnderAllowed( file ) {
 
@@ -25,25 +22,44 @@ function isUnderAllowed( file ) {
 
 }
 
-const result = spawnSync( 'git', [ 'status', '--porcelain' ], {
-	cwd: ROOT,
-	encoding: 'utf8',
-} );
+function gitLines( args ) {
 
-if ( result.status !== 0 ) {
+	const result = spawnSync( 'git', args, { cwd: ROOT, encoding: 'utf8' } );
 
-	console.error( 'git status 失败' );
-	process.exit( 1 );
+	if ( result.status !== 0 ) {
+
+		throw new Error( `git ${ args.join( ' ' ) } 失败` );
+
+	}
+
+	return result.stdout.trim().split( '\n' ).filter( Boolean );
 
 }
 
-const lines = result.stdout.trim().split( '\n' ).filter( Boolean );
+function getChangedFiles() {
+
+	const files = new Set();
+
+	for ( const file of gitLines( [ 'diff', '--name-only', '--diff-filter=ACDMRTUXB', 'HEAD' ] ) ) {
+
+		files.add( file );
+
+	}
+
+	for ( const file of gitLines( [ 'ls-files', '--others', '--exclude-standard' ] ) ) {
+
+		if ( file.startsWith( '.three-sync-cache' ) ) continue;
+		files.add( file );
+
+	}
+
+	return [ ...files ];
+
+}
+
 const violations = [];
 
-for ( const line of lines ) {
-
-	const file = line.slice( 3 ).trim();
-	if ( file.startsWith( '.three-sync-cache' ) ) continue;
+for ( const file of getChangedFiles() ) {
 
 	if ( ! isUnderAllowed( file ) ) {
 
@@ -56,6 +72,7 @@ for ( const line of lines ) {
 if ( violations.length > 0 ) {
 
 	console.error( '[verify] 发现不允许的变更（同步应仅影响 sync-paths.json 中的目录）：' );
+	console.error( `[verify] 允许目录: ${ ALLOWED.join( ', ' ) }` );
 	for ( const v of violations ) console.error( `  - ${ v }` );
 	process.exit( 1 );
 

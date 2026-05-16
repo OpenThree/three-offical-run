@@ -13,19 +13,16 @@ import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { loadSyncPaths } from './load-sync-paths.mjs';
 
 const __dirname = path.dirname( fileURLToPath( import.meta.url ) );
 const ROOT = path.resolve( __dirname, '..' );
 const CACHE_DIR = path.join( ROOT, '.three-sync-cache', 'three.js' );
 const REPO_URL = 'https://github.com/mrdoob/three.js.git';
 const LOG_PATH = path.join( ROOT, '.three-sync-cache', 'last-sync.json' );
-const PATHS_FILE = path.join( __dirname, 'sync-paths.json' );
 
 /** 仅此列表中的目录会被删除并用官方同名目录完整替换 */
-const SYNC_PATHS = JSON.parse( fs.readFileSync( PATHS_FILE, 'utf8' ) ).map( ( rel ) => ( {
-	from: rel,
-	to: rel,
-} ) );
+const SYNC_PATHS = loadSyncPaths().map( ( rel ) => ( { from: rel, to: rel } ) );
 
 function parseArgs() {
 
