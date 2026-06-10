@@ -52,6 +52,20 @@ export class Style {
 		font-family: var(--font-family);
 	}
 
+	.profiler-toggle-graph {
+		position: absolute;
+		bottom: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		z-index: 0;
+		pointer-events: none;
+		background: transparent;
+		border: none;
+		border-radius: inherit;
+		opacity: 0.5;
+	}
+
 	.profiler-toggle.position-right.panel-open {
 		right: auto;
 		left: 15px;
@@ -75,6 +89,7 @@ export class Style {
 
 	.toggle-icon {
 		position: relative;
+		z-index: 1;
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -143,6 +158,8 @@ export class Style {
 	}
 
 	.toggle-text {
+		position: relative;
+		z-index: 1;
 		display: flex;
 		align-items: baseline;
 		padding: 8px 14px;
@@ -157,6 +174,8 @@ export class Style {
 	}
 
 	.builtin-tabs-container {
+		position: relative;
+		z-index: 1;
 		display: flex;
 		align-items: stretch;
 		gap: 0;
@@ -238,6 +257,22 @@ export class Style {
 		display: block;
 		opacity: 1;
 		transform: translateY(0) scale(1);
+	}
+
+	/* Position toggle and mini-panel at the bottom when maximized */
+	:scope:has(.profiler-panel.maximized) .profiler-toggle,
+	:scope.maximized .profiler-toggle {
+		top: auto !important;
+		bottom: 15px !important;
+		z-index: 10005 !important;
+	}
+
+	:scope:has(.profiler-panel.maximized) .profiler-mini-panel,
+	:scope.maximized .profiler-mini-panel {
+		top: auto !important;
+		bottom: 60px !important;
+		max-height: calc(100vh - 120px) !important;
+		z-index: 10006 !important;
 	}
 
 	.profiler-mini-panel::-webkit-scrollbar {
@@ -686,6 +721,11 @@ export class Style {
 		width: calc(100% - 90px);
 	}
 
+	/* Adjust header width when maximized (floating position toggle button is hidden) */
+	.profiler-panel.maximized .profiler-header {
+		width: calc(100% - 90px);
+	}
+
 	/* ===== RULES FOR WHEN THERE ARE NO TABS ===== */
 
 	/* Horizontal mode (bottom/top) without tabs */
@@ -933,6 +973,11 @@ export class Style {
 		display: none !important;
 	}
 
+	/* Hide floating button when maximized */
+	.profiler-panel.maximized .floating-btn {
+		display: none !important;
+	}
+
 	.profiler-content-wrapper {
 		flex-grow: 1;
 		overflow: hidden;
@@ -1160,27 +1205,19 @@ export class Style {
 		position: relative;
 	}
 
-	.graph-svg {
-		width: 100%;
+	.graph-svg, .graph-canvas {
+		width: 0;
+		min-width: 100%;
 		height: 80px;
 		background-color: var(--profiler-header);
 		border: 1px solid var(--profiler-border);
 		border-radius: 4px;
+		display: block;
 	}
 
 	.graph-path {
 		stroke-width: 2;
 		fill-opacity: 0.4;
-	}
-
-	.console-header {
-		padding: 10px;
-		border-bottom: 1px solid var(--profiler-border);
-		display: flex;
-		gap: 20px;
-		flex-shrink: 0;
-		align-items: center;
-		justify-content: space-between;
 	}
 
 	.console-buttons-group {
@@ -1473,6 +1510,14 @@ export class Style {
 		margin-bottom: 2px;
 	}
 
+	.mini-panel-content .list-container.parameters .list-children-container > .list-item-wrapper:first-child:has(> .list-item-row:not(.collapsible)) {
+		margin-top: 2px;
+	}
+
+	.mini-panel-content .list-container.parameters .list-children-container > .list-item-wrapper:last-child:has(> .list-item-row:not(.collapsible)) {
+		margin-bottom: 4px;
+	}
+
 	@media screen and (max-width: 450px) and (orientation: portrait) {
 
 		.console-filter-input {
@@ -1756,6 +1801,139 @@ export class Style {
 
 	.panel-action-btn:hover {
 		background-color: rgba(255, 255, 255, 0.05);
+	}
+
+	.node-canvas-wrapper {
+		touch-action: none;
+	}
+
+	.node-canvas-wrapper .node-canvas-detach-btn {
+		position: absolute;
+		top: 5px;
+		right: 5px;
+		background: rgba(30, 30, 36, 0.85);
+		border: 1px solid var(--profiler-border);
+		color: var(--text-primary);
+		border-radius: 4px;
+		padding: 4px;
+		cursor: pointer;
+		opacity: 1;
+		transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		z-index: 10;
+	}
+
+	.node-canvas-wrapper .node-canvas-detach-btn:hover {
+		background-color: var(--color-accent);
+		border-color: var(--color-accent);
+		color: white;
+	}
+
+	.node-canvas-wrapper .node-canvas-fullscreen-btn {
+		position: absolute;
+		bottom: 5px;
+		right: 5px;
+		background: rgba(30, 30, 36, 0.85);
+		border: 1px solid var(--profiler-border);
+		color: var(--text-primary);
+		border-radius: 4px;
+		padding: 4px;
+		cursor: pointer;
+		opacity: 1;
+		transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		z-index: 10;
+	}
+
+	.node-canvas-wrapper .node-canvas-fullscreen-btn:hover {
+		background-color: var(--color-accent);
+		border-color: var(--color-accent);
+		color: white;
+	}
+
+	.profiler-panel.maximized .node-canvas-fullscreen-btn {
+		display: none;
+	}
+
+	.toolbar {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 6px 8px;
+		border-bottom: 1px solid var(--profiler-border);
+		background: var(--profiler-header-background);
+		flex-shrink: 0;
+		box-sizing: border-box;
+		gap: 16px;
+	}
+
+	.toolbar span {
+		margin-right: 8px;
+		color: var(--text-secondary);
+		font-size: 12px;
+		font-weight: 600;
+	}
+
+	.viewer-content .toolbar {
+		justify-content: flex-end;
+	}
+
+	.viewer-back-btn {
+		background: transparent;
+		border: none;
+		color: var(--text-secondary);
+		cursor: pointer;
+		font-size: 16px;
+		line-height: 1;
+		padding: 4px 8px;
+		border-radius: 4px;
+		margin-right: auto;
+		transition: color 0.2s, background-color 0.2s;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.viewer-back-btn:hover {
+		color: var(--text-primary);
+		background-color: rgba(255, 255, 255, 0.05);
+	}
+
+	.select {
+		background: var(--profiler-background);
+		border: 1px solid var(--profiler-border);
+		color: var(--text-primary);
+		border-radius: 4px;
+		padding: 4px 16px 2px 6px;
+		font-family: var(--font-mono);
+		font-size: 12px;
+		outline: none;
+		cursor: pointer;
+		appearance: none;
+		-webkit-appearance: none;
+		-moz-appearance: none;
+		background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23e0e0e0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+		background-repeat: no-repeat;
+		background-position: right 5px center;
+		background-size: 10px;
+	}
+
+	.select:focus {
+		border-color: var(--color-accent);
+	}
+
+	.full-viewer-container {
+		display: none;
+		flex-grow: 1;
+		width: 100%;
+		height: 100%;
+		overflow: hidden;
+		position: relative;
+		touch-action: none;
 	}
 
 }
