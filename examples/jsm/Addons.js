@@ -46,6 +46,7 @@ export * from './exporters/USDZExporter.js';
 export * from './geometries/BoxLineGeometry.js';
 export * from './geometries/ConvexGeometry.js';
 export * from './geometries/DecalGeometry.js';
+export * from './geometries/LoftGeometry.js';
 export * from './geometries/ParametricFunctions.js';
 export * from './geometries/ParametricGeometry.js';
 export * from './geometries/RoundedBoxGeometry.js';
@@ -170,7 +171,6 @@ export * from './objects/Sky.js';
 export * from './objects/Water.js';
 export { Water as Water2 } from './objects/Water2.js';
 
-export * from './physics/AmmoPhysics.js';
 export * from './physics/JoltPhysics.js';
 export * from './physics/RapierPhysics.js';
 
