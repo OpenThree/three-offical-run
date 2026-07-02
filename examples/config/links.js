@@ -1,5 +1,5 @@
 import { HOST } from "./host.js"
-import { REVISION } from '../../build/three.module.min.js'
+import { REVISION } from '../../build/three.module.js'
 
 
 // 企业可根据自己的需求修改url 成自己的导航地址 链接
