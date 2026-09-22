@@ -9891,9 +9891,7 @@ class Textures extends DataMap {
 
 					if ( texture.source.dataReady === true ) backend.updateTexture( texture, options );
 
-					const skipAutoGeneration = texture.isStorageTexture === true && texture.mipmapsAutoUpdate === false;
-
-					if ( options.needsMipmaps && texture.mipmaps.length === 0 && ! skipAutoGeneration ) {
+					if ( options.needsMipmaps && texture.mipmaps.length === 0 && texture.mipmapsAutoUpdate === true ) {
 
 						backend.generateMipmaps( texture );
 
@@ -14006,6 +14004,12 @@ class NodeBuilder {
 	 */
 	isDeterministic( node ) {
 
+		if ( node.isVarNode && node.intent ) {
+
+			node = node.node;
+
+		}
+
 		if ( node.isMathNode ) {
 
 			return this.isDeterministic( node.aNode ) &&
@@ -14661,6 +14665,34 @@ class NodeBuilder {
 	getVar( type, name, count = null ) {
 
 		return `${ count !== null ? this.generateArrayDeclaration( type, count ) : this.getType( type ) } ${ name }`;
+
+	}
+
+	/**
+	 * Returns a single const variable statement as a shader string for the given variable type and name.
+	 *
+	 * @param {string} type - The variable's type.
+	 * @param {string} name - The variable's name.
+	 * @param {?number} [count=null] - The array length.
+	 * @return {string} The shader string.
+	 */
+	generateConstStatement( type, name, count = null ) {
+
+		return `const ${ this.getVar( type, name, count ) }`;
+
+	}
+
+	/**
+	 * Returns a single variable statement as a shader string for the given variable type and name.
+	 *
+	 * @param {string} type - The variable's type.
+	 * @param {string} name - The variable's name.
+	 * @param {?number} [count=null] - The array length.
+	 * @return {string} The shader string.
+	 */
+	generateVarStatement( type, name, count = null ) {
+
+		return this.getVar( type, name, count );
 
 	}
 
@@ -18232,13 +18264,6 @@ class NodeLibrary {
 	constructor() {
 
 		/**
-		 * A weak map that maps lights to light nodes.
-		 *
-		 * @type {WeakMap<Light.constructor,AnalyticLightNode.constructor>}
-		 */
-		this.lightNodes = new WeakMap();
-
-		/**
 		 * A map that maps materials to node materials.
 		 *
 		 * @type {Map<string,NodeMaterial.constructor>}
@@ -18340,24 +18365,30 @@ class NodeLibrary {
 	/**
 	 * Returns a light node class definition for a light class definition.
 	 *
-	 * @param {Light.constructor} light - The light class definition.
+	 * @deprecated since r187. Use `Light.registerNode()` to assign light node classes instead.
+	 * @param {Light.constructor} lightClass - The light class definition.
 	 * @return {?AnalyticLightNode.constructor} The light node class definition. Returns `null` if no light node is found.
 	 */
-	getLightNodeClass( light ) {
+	getLightNodeClass( lightClass ) {
 
-		return this.lightNodes.get( light ) || null;
+		warnOnce( 'NodeLibrary: "getLightNodeClass()" has been deprecated. Use "Light.registerNode()" to assign light node classes instead.' ); // @deprecated r187
+
+		return lightClass.prototype._lightNode || null;
 
 	}
 
 	/**
 	 * Adds a light node class definition for a given light class definition.
 	 *
+	 * @deprecated since r187. Use `Light.registerNode()` instead.
 	 * @param {AnalyticLightNode.constructor} lightNodeClass - The light node class definition.
 	 * @param {Light.constructor} lightClass - The light class definition.
 	 */
 	addLight( lightNodeClass, lightClass ) {
 
-		this.addClass( lightNodeClass, lightClass, this.lightNodes );
+		warnOnce( 'NodeLibrary: "addLight()" has been deprecated. Use "Light.registerNode()" instead.' ); // @deprecated r187
+
+		lightClass.registerNode( lightNodeClass );
 
 	}
 
@@ -18381,29 +18412,6 @@ class NodeLibrary {
 		if ( typeof type === 'function' || typeof type === 'object' ) throw new Error( `THREE.NodeLibrary: Base class ${ type } is not a class.` );
 
 		library.set( type, nodeClass );
-
-	}
-
-	/**
-	 * Adds a node class definition for the given class definition to the provided type library.
-	 *
-	 * @param {Node.constructor} nodeClass - The node class definition.
-	 * @param {Node.constructor} baseClass - The class definition.
-	 * @param {WeakMap<Node.constructor, Node.constructor>} library - The type library.
-	 */
-	addClass( nodeClass, baseClass, library ) {
-
-		if ( library.has( baseClass ) ) {
-
-			warn( `Redefinition of node ${ baseClass.name }` );
-			return;
-
-		}
-
-		if ( typeof nodeClass !== 'function' ) throw new Error( `THREE.NodeLibrary: Node class ${ nodeClass.name } is not a class.` );
-		if ( typeof baseClass !== 'function' ) throw new Error( `THREE.NodeLibrary: Base class ${ baseClass.name } is not a class.` );
-
-		library.set( baseClass, nodeClass );
 
 	}
 
@@ -27279,6 +27287,34 @@ ${ flowData.code }
 	}
 
 	/**
+	 * Returns a single const variable statement as a GLSL string for the given variable type and name.
+	 *
+	 * @param {string} type - The variable's type.
+	 * @param {string} name - The variable's name.
+	 * @param {?number} [count=null] - The array length.
+	 * @return {string} The GLSL snippet that defines a const variable.
+	 */
+	generateConstStatement( type, name, count = null ) {
+
+		return `const ${ this.getVar( type, name, count ) }`;
+
+	}
+
+	/**
+	 * Returns a single variable statement as a GLSL string for the given variable type and name.
+	 *
+	 * @param {string} type - The variable's type.
+	 * @param {string} name - The variable's name.
+	 * @param {?number} [count=null] - The array length.
+	 * @return {string} The GLSL snippet that defines a variable.
+	 */
+	generateVarStatement( type, name, count = null ) {
+
+		return this.getVar( type, name, count );
+
+	}
+
+	/**
 	 * Returns the varyings of the given shader stage as a GLSL string.
 	 *
 	 * @param {string} shaderStage - The shader stage.
@@ -32356,7 +32392,7 @@ class WebGLTextureUtils {
 		state.pixelStorei( gl.UNPACK_SKIP_IMAGES, currentUnpackSkipImages );
 
 		// Generate mipmaps only when copying level 0
-		if ( dstLevel === 0 && dstTexture.generateMipmaps ) {
+		if ( dstLevel === 0 && dstTexture.generateMipmaps === true && dstTexture.mipmapsAutoUpdate === true ) {
 
 			gl.generateMipmap( glTextureType );
 
@@ -32455,7 +32491,7 @@ class WebGLTextureUtils {
 
 		}
 
-		if ( texture.generateMipmaps ) this.generateMipmaps( texture );
+		if ( texture.generateMipmaps === true && texture.mipmapsAutoUpdate === true ) this.generateMipmaps( texture );
 
 		this.backend._setFramebuffer( renderContext );
 
@@ -34088,7 +34124,7 @@ class WebGLBackend extends Backend {
 
 				const texture = textures[ i ];
 
-				if ( texture.generateMipmaps ) {
+				if ( texture.generateMipmaps === true && texture.mipmapsAutoUpdate === true ) {
 
 					this.generateMipmaps( texture );
 
@@ -41804,6 +41840,42 @@ class WGSLNodeBuilder extends NodeBuilder {
 	 */
 	generateTextureGather( texture, textureProperty, uvSnippet, gatherSnippet, depthSnippet, offsetSnippet ) {
 
+		const { primarySamples } = this.renderer.backend.utils.getTextureSampleData( texture );
+
+		if ( primarySamples > 1 ) {
+
+			// textureGather() has no overload for multisampled textures (e.g. the depth
+			// of a MSAA render target), so the four texels are fetched with textureLoad()
+
+			const textureDimension = this.generateTextureDimension( texture, textureProperty, '0u' );
+
+			let coordSnippet = `vec2<i32>( floor( ${ uvSnippet } * vec2<f32>( ${ textureDimension } ) - 0.5 ) )`;
+
+			if ( offsetSnippet ) {
+
+				coordSnippet = `${ coordSnippet } + ${ offsetSnippet }`;
+
+			}
+
+			const coord = new VarNode( new ExpressionNode( coordSnippet, 'ivec2' ) ).build( this );
+			const coordMax = `vec2<i32>( ${ textureDimension } ) - 1`;
+
+			const load = ( x, y ) => {
+
+				const snippet = this.generateTextureLoad( texture, textureProperty, `clamp( ${ coord } + vec2<i32>( ${ x }, ${ y } ), vec2<i32>( 0 ), ${ coordMax } )`, null, null, null );
+
+				return texture.isDepthTexture === true ? snippet : `${ snippet }[ ${ gatherSnippet } ]`;
+
+			};
+
+			// same texel order as textureGather()
+
+			const componentPrefix = this.getComponentTypeFromTexture( texture ).charAt( 0 );
+
+			return `vec4<${ componentPrefix }32>( ${ load( 0, 1 ) }, ${ load( 1, 1 ) }, ${ load( 1, 0 ) }, ${ load( 0, 0 ) } )`;
+
+		}
+
 		const componentSnippet = texture.isDepthTexture === true ? '' : `${gatherSnippet}, `;
 
 		if ( depthSnippet ) {
@@ -42802,6 +42874,34 @@ ${ flowData.code }
 		}
 
 		return snippet;
+
+	}
+
+	/**
+	 * Returns a single const variable statement as a WGSL string for the given variable type and name.
+	 *
+	 * @param {string} type - The variable's type.
+	 * @param {string} name - The variable's name.
+	 * @param {?number} [count=null] - The array length.
+	 * @return {string} The WGSL snippet that defines a const variable.
+	 */
+	generateConstStatement( type, name/*, count = null*/ ) {
+
+		return `const ${ name }`;
+
+	}
+
+	/**
+	 * Returns a single variable statement as a WGSL string for the given variable type and name.
+	 *
+	 * @param {string} type - The variable's type.
+	 * @param {string} name - The variable's name.
+	 * @param {?number} [count=null] - The array length.
+	 * @return {string} The WGSL snippet that defines a variable.
+	 */
+	generateVarStatement( type, name/*, count = null*/ ) {
+
+		return `let ${ name }`;
 
 	}
 
@@ -47982,7 +48082,7 @@ class WebGPUBackend extends Backend {
 
 				const texture = textures[ i ];
 
-				if ( texture.generateMipmaps === true ) {
+				if ( texture.generateMipmaps === true && texture.mipmapsAutoUpdate === true ) {
 
 					this.textureUtils.generateMipmaps( texture );
 
@@ -49458,7 +49558,7 @@ class WebGPUBackend extends Backend {
 
 		submit( this.device, encoder.finish() );
 
-		if ( dstLevel === 0 && dstTexture.generateMipmaps ) {
+		if ( dstLevel === 0 && dstTexture.generateMipmaps === true && dstTexture.mipmapsAutoUpdate === true ) {
 
 			this.textureUtils.generateMipmaps( dstTexture );
 
@@ -49515,7 +49615,7 @@ class WebGPUBackend extends Backend {
 
 		}
 
-		const generateMipmaps = texture.generateMipmaps === true && destinationGPU.mipLevelCount > 1;
+		const generateMipmaps = texture.generateMipmaps === true && texture.mipmapsAutoUpdate === true && destinationGPU.mipLevelCount > 1;
 
 		if ( this._isRenderCameraDepthArray( renderContext ) === true ) {
 
@@ -49774,6 +49874,16 @@ class ProjectorLight extends SpotLight {
 
 }
 
+PointLight.registerNode( PointLightNode );
+DirectionalLight.registerNode( DirectionalLightNode );
+RectAreaLight.registerNode( RectAreaLightNode );
+SpotLight.registerNode( SpotLightNode );
+AmbientLight.registerNode( AmbientLightNode );
+HemisphereLight.registerNode( HemisphereLightNode );
+LightProbe.registerNode( LightProbeNode );
+IESSpotLight.registerNode( IESSpotLightNode );
+ProjectorLight.registerNode( ProjectorLightNode );
+
 /**
  * This version of a node library represents the standard version
  * used in {@link WebGPURenderer}. It maps lights, tone mapping
@@ -49803,16 +49913,6 @@ class StandardNodeLibrary extends NodeLibrary {
 		this.addMaterial( PointsNodeMaterial, 'PointsMaterial' );
 		this.addMaterial( SpriteNodeMaterial, 'SpriteMaterial' );
 		this.addMaterial( ShadowNodeMaterial, 'ShadowMaterial' );
-
-		this.addLight( PointLightNode, PointLight );
-		this.addLight( DirectionalLightNode, DirectionalLight );
-		this.addLight( RectAreaLightNode, RectAreaLight );
-		this.addLight( SpotLightNode, SpotLight );
-		this.addLight( AmbientLightNode, AmbientLight );
-		this.addLight( HemisphereLightNode, HemisphereLight );
-		this.addLight( LightProbeNode, LightProbe );
-		this.addLight( IESSpotLightNode, IESSpotLight );
-		this.addLight( ProjectorLightNode, ProjectorLight );
 
 		this.addToneMapping( linearToneMapping, LinearToneMapping );
 		this.addToneMapping( reinhardToneMapping, ReinhardToneMapping );
@@ -50642,15 +50742,6 @@ class StorageTexture extends Texture {
 		 */
 		this.isStorageTexture = true;
 
-		/**
-		 * When `true`, mipmaps will be auto-generated after compute writes.
-		 * When `false`, mipmaps must be written manually via compute shaders.
-		 *
-		 * @type {boolean}
-		 * @default true
-		 */
-		this.mipmapsAutoUpdate = true;
-
 	}
 	/**
 	 * Sets the size of the storage texture.
@@ -50735,6 +50826,17 @@ class Storage3DTexture extends Texture {
 		 * @default true
 		 */
 		this.isStorageTexture = true;
+
+		/**
+		 * Whether the renderer regenerates the mipmaps automatically.
+		 *
+		 * Overwritten and set to `false` by default since the WebGPU backend
+		 * does not support mipmap generation for 3D textures.
+		 *
+		 * @type {boolean}
+		 * @default false
+		 */
+		this.mipmapsAutoUpdate = false;
 
 		/**
 		 * Indicates whether this texture is a 3D texture.
@@ -50839,6 +50941,16 @@ class StorageArrayTexture extends Texture {
 		 * @default true
 		 */
 		this.isStorageTexture = true;
+
+		/**
+		 * Whether the renderer regenerates the mipmaps automatically.
+		 *
+		 * Overwritten and set to `false` by default.
+		 *
+		 * @type {boolean}
+		 * @default false
+		 */
+		this.mipmapsAutoUpdate = false;
 
 	}
 
@@ -51355,6 +51467,16 @@ class NodeObjectLoader extends ObjectLoader {
 
 }
 
+PointLight.registerNode( PointLightNode );
+DirectionalLight.registerNode( DirectionalLightNode );
+RectAreaLight.registerNode( RectAreaLightNode );
+SpotLight.registerNode( SpotLightNode );
+AmbientLight.registerNode( AmbientLightNode );
+HemisphereLight.registerNode( HemisphereLightNode );
+LightProbe.registerNode( LightProbeNode );
+IESSpotLight.registerNode( IESSpotLightNode );
+ProjectorLight.registerNode( ProjectorLightNode );
+
 /**
  * This version of a node library represents a basic version
  * just focusing on lights and tone mapping techniques.
@@ -51370,16 +51492,6 @@ class BasicNodeLibrary extends NodeLibrary {
 	constructor() {
 
 		super();
-
-		this.addLight( PointLightNode, PointLight );
-		this.addLight( DirectionalLightNode, DirectionalLight );
-		this.addLight( RectAreaLightNode, RectAreaLight );
-		this.addLight( SpotLightNode, SpotLight );
-		this.addLight( AmbientLightNode, AmbientLight );
-		this.addLight( HemisphereLightNode, HemisphereLight );
-		this.addLight( LightProbeNode, LightProbe );
-		this.addLight( IESSpotLightNode, IESSpotLight );
-		this.addLight( ProjectorLightNode, ProjectorLight );
 
 		this.addToneMapping( linearToneMapping, LinearToneMapping );
 		this.addToneMapping( reinhardToneMapping, ReinhardToneMapping );
