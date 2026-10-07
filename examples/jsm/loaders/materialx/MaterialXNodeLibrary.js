@@ -349,17 +349,23 @@ const mx_transformpoint = ( inNode = vec3( 0, 0, 0 ), fromspace = 'world', tospa
 
 };
 
+// MaterialX returns 0 where the divisor vanishes. Selecting the result, rather than multiplying it
+// by a step, keeps the division by zero from turning that 0 into NaN.
 const mx_burn_channel = ( fg, bg, mixval = 1 ) => {
 
-	const composed = add( mul( mixval, sub( 1, div( sub( 1, bg ), fg ) ) ), mul( sub( 1, mixval ), bg ) );
-	return mul( composed, step( float( 1e-6 ), abs( fg ) ) );
+	const vanishes = abs( fg ).lessThan( 1e-6 );
+	const divisor = vanishes.select( float( 1 ), fg );
+	const composed = add( mul( mixval, sub( 1, div( sub( 1, bg ), divisor ) ) ), mul( sub( 1, mixval ), bg ) );
+	return vanishes.select( float( 0 ), composed );
 
 };
 
 const mx_dodge_channel = ( fg, bg, mixval = 1 ) => {
 
-	const composed = add( mul( mixval, div( bg, sub( 1, fg ) ) ), mul( sub( 1, mixval ), bg ) );
-	return mul( composed, step( float( 1e-6 ), abs( sub( 1, fg ) ) ) );
+	const vanishes = abs( sub( 1, fg ) ).lessThan( 1e-6 );
+	const divisor = vanishes.select( float( 1 ), sub( 1, fg ) );
+	const composed = add( mul( mixval, div( bg, divisor ) ), mul( sub( 1, mixval ), bg ) );
+	return vanishes.select( float( 0 ), composed );
 
 };
 
@@ -560,6 +566,13 @@ const mx_fractal_noise_float_materialx_2d = Fn( ( [ texcoordInput, octavesInput,
 
 	return mul( result, amplitude );
 
+}, {
+	texcoord: 'vec2',
+	octaves: 'int',
+	lacunarity: 'float',
+	diminish: 'float',
+	amplitude: 'float',
+	return: 'float'
 } );
 
 const mx_fractal_noise_vec3_materialx_2d = Fn( ( [ texcoordInput, octavesInput, lacunarityInput, diminishInput, amplitudeInput ] ) => {
@@ -582,6 +595,13 @@ const mx_fractal_noise_vec3_materialx_2d = Fn( ( [ texcoordInput, octavesInput, 
 
 	return mul( result, amplitude );
 
+}, {
+	texcoord: 'vec2',
+	octaves: 'int',
+	lacunarity: 'float',
+	diminish: 'float',
+	amplitude: 'vec3',
+	return: 'vec3'
 } );
 
 const MXElements = [
