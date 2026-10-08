@@ -40,9 +40,12 @@ import {
 	mx_splitlr,
 	mx_splittb,
 	mx_fractal_noise_float,
+	mx_fractal_noise_vec2,
 	mx_fractal_noise_vec3,
+	mx_fractal_noise_vec4,
 	mx_noise_float,
 	mx_noise_vec3,
+	mx_noise_vec4,
 	mx_cell_noise_float,
 	mx_cell_noise_vec3,
 	mx_smoothstep,
@@ -520,15 +523,89 @@ const defaultVec3 = ( x, y, z ) => () => vec3( x, y, z );
 const defaultVec4 = ( x, y, z, w ) => () => vec4( x, y, z, w );
 const usesVec2Noise = ( nodeX ) => nodeX && nodeX.type === 'vector2';
 const usesVec3Noise = ( nodeX ) => nodeX && ( nodeX.type === 'vector3' || nodeX.type === 'color3' );
+const usesVec4Noise = ( nodeX ) => nodeX && ( nodeX.type === 'vector4' || nodeX.type === 'color4' );
 
-const mx_noise_materialx = ( texcoord, amplitude, pivot, nodeX ) =>
-	usesVec3Noise( nodeX ) ? mx_noise_vec3( texcoord, vec3( amplitude ), pivot ) : mx_noise_float( texcoord, amplitude, pivot );
+// Offset of the fourth channel of fractal2d vector4, as in MaterialX's mx_noise.glsl.
+const fractalOffset2d = () => vec2( 19, 193 );
 
-const mx_fractal_noise_materialx_2d = ( texcoord, octaves, lacunarity, diminish, amplitude, nodeX ) =>
-	usesVec3Noise( nodeX ) ? mx_fractal_noise_vec3_materialx_2d( texcoord, octaves, lacunarity, diminish, amplitude ) : mx_fractal_noise_float_materialx_2d( texcoord, octaves, lacunarity, diminish, amplitude );
+const mx_noise_materialx = ( texcoord, amplitude, pivot, nodeX ) => {
 
-const mx_fractal_noise_materialx_3d = ( position, octaves, lacunarity, diminish, amplitude, nodeX ) =>
-	usesVec3Noise( nodeX ) ? mx_fractal_noise_vec3( position, octaves, lacunarity, diminish, vec3( amplitude ) ) : mx_fractal_noise_float( position, octaves, lacunarity, diminish, amplitude );
+	if ( usesVec4Noise( nodeX ) ) return mx_noise_vec4( texcoord, vec4( amplitude ), pivot );
+	if ( usesVec3Noise( nodeX ) ) return mx_noise_vec3( texcoord, vec3( amplitude ), pivot );
+
+	if ( usesVec2Noise( nodeX ) ) {
+
+		const noise = mx_noise_vec3( texcoord );
+		return add( mul( vec2( element( noise, 0 ), element( noise, 1 ) ), vec2( amplitude ) ), pivot );
+
+	}
+
+	return mx_noise_float( texcoord, amplitude, pivot );
+
+};
+
+const mx_fractal_noise_materialx_2d = ( texcoord, octaves, lacunarity, diminish, amplitude, nodeX ) => {
+
+	if ( usesVec4Noise( nodeX ) ) {
+
+		const noise = vec4(
+			mx_fractal_noise_vec3_materialx_2d( texcoord, octaves, lacunarity, diminish, vec3( 1 ) ),
+			mx_fractal_noise_float_materialx_2d( add( texcoord, fractalOffset2d() ), octaves, lacunarity, diminish, float( 1 ) ),
+		);
+		return mul( noise, vec4( amplitude ) );
+
+	}
+
+	if ( usesVec3Noise( nodeX ) ) return mx_fractal_noise_vec3_materialx_2d( texcoord, octaves, lacunarity, diminish, amplitude );
+
+	if ( usesVec2Noise( nodeX ) ) {
+
+		const noise = vec2(
+			mx_fractal_noise_float_materialx_2d( texcoord, octaves, lacunarity, diminish, float( 1 ) ),
+			mx_fractal_noise_float_materialx_2d( add( texcoord, fractalOffset2d() ), octaves, lacunarity, diminish, float( 1 ) ),
+		);
+		return mul( noise, vec2( amplitude ) );
+
+	}
+
+	return mx_fractal_noise_float_materialx_2d( texcoord, octaves, lacunarity, diminish, amplitude );
+
+};
+
+const mx_fractal_noise_materialx_3d = ( position, octaves, lacunarity, diminish, amplitude, nodeX ) => {
+
+	if ( usesVec4Noise( nodeX ) ) return mx_fractal_noise_vec4( position, octaves, lacunarity, diminish, vec4( amplitude ) );
+	if ( usesVec3Noise( nodeX ) ) return mx_fractal_noise_vec3( position, octaves, lacunarity, diminish, vec3( amplitude ) );
+	if ( usesVec2Noise( nodeX ) ) return mx_fractal_noise_vec2( position, octaves, lacunarity, diminish, vec2( amplitude ) );
+	return mx_fractal_noise_float( position, octaves, lacunarity, diminish, amplitude );
+
+};
+
+const mx_randomfloat = ( inNode, minNode, maxNode, seed, scale = 4096 ) => {
+
+	const noise = mx_cell_noise_float( vec2( mul( float( inNode ), scale ), float( seed ) ) );
+	return clamp( add( minNode, mul( noise, sub( maxNode, minNode ) ) ), minNode, maxNode );
+
+};
+
+const mx_randomfloat_materialx = ( inNode, minNode, maxNode, seed, nodeX ) => {
+
+	const input = nodeX.getChildByName( 'in' );
+	return mx_randomfloat( inNode, minNode, maxNode, seed, input && input.type === 'integer' ? 1 : 4096 );
+
+};
+
+const mx_randomcolor = ( inNode, hueLow, hueHigh, saturationLow, saturationHigh, brightnessLow, brightnessHigh, seed ) => {
+
+	const randomInRange = ( offset, low, high ) => add( low, mul( mx_randomfloat( inNode, float( 0 ), float( 1 ), ceil( add( float( seed ), offset ) ) ), sub( high, low ) ) );
+
+	return mx_hsvtorgb( vec3(
+		randomInRange( 413.3, hueLow, hueHigh ),
+		randomInRange( 1522.4, saturationLow, saturationHigh ),
+		randomInRange( 1813.8, brightnessLow, brightnessHigh ),
+	) );
+
+};
 
 const mx_cell_noise_materialx = ( position, nodeX ) =>
 	usesVec3Noise( nodeX ) ? mx_cell_noise_vec3( position ) : mx_cell_noise_float( position );
@@ -886,6 +963,22 @@ const MXElements = [
 	}, true ),
 	createMXElement( 'cellnoise2d', mx_cell_noise_materialx, [ 'texcoord' ], { texcoord: defaultVec2( 0, 0 ) }, true ),
 	createMXElement( 'cellnoise3d', mx_cell_noise_materialx, [ 'position' ], { position: () => positionLocal }, true ),
+	createMXElement( 'randomfloat', mx_randomfloat_materialx, [ 'in', 'min', 'max', 'seed' ], {
+		in: defaultFloat( 0 ),
+		min: defaultFloat( 0 ),
+		max: defaultFloat( 1 ),
+		seed: defaultInt( 0 ),
+	}, true ),
+	createMXElement( 'randomcolor', mx_randomcolor, [ 'in', 'huelow', 'huehigh', 'saturationlow', 'saturationhigh', 'brightnesslow', 'brightnesshigh', 'seed' ], {
+		in: defaultFloat( 0 ),
+		huelow: defaultFloat( 0 ),
+		huehigh: defaultFloat( 1 ),
+		saturationlow: defaultFloat( 0.825 ),
+		saturationhigh: defaultFloat( 1 ),
+		brightnesslow: defaultFloat( 1 ),
+		brightnesshigh: defaultFloat( 1 ),
+		seed: defaultInt( 0 ),
+	} ),
 	createMXElement( 'worleynoise2d', mx_worley_noise_materialx_2d, [ 'texcoord', 'jitter', 'style' ], {
 		texcoord: defaultVec2( 0, 0 ),
 		jitter: defaultFloat( 1 ),
