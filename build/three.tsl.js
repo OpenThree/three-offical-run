@@ -24505,8 +24505,6 @@ const instancedMesh = /*@__PURE__*/ Fn( ( [ instancedMesh ], builder ) => {
 
 }, 'void' );
 
-const _previousBatchingMatrices = /*@__PURE__*/ new WeakMap();
-
 /**
  * TSL function that retrieves the batching color for a given instance ID from a colors texture.
  *
@@ -24565,40 +24563,28 @@ function createBatchingMatrixNode( matricesTexture, id ) {
 }
 
 /**
- * Retrieves or initializes the previous frame batching matrix node for motion vectors.
- * Uses a WeakMap to cache previous frame matrices textures and their TSL nodes.
+ * Returns the batching matrices texture of the previous frame for motion vectors.
+ * It is created on first use and again after the batched mesh released it.
  *
  * @param {BatchedMesh} batchMesh - The batched mesh.
- * @param {Node<uint>} id - The indirect instance ID.
- * @returns {Node<mat4>} The previous frame batching matrix node.
+ * @returns {DataTexture} The previous frame matrices texture.
  */
-function getPreviousNode( batchMesh, id ) {
+function getPreviousMatricesTexture( batchMesh ) {
 
-	let data = _previousBatchingMatrices.get( batchMesh );
+	let previousMatricesTexture = batchMesh._previousMatricesTexture;
 
-	const matricesTexture = batchMesh._matricesTexture;
+	if ( previousMatricesTexture === null ) {
 
-	if ( data === undefined || data.matricesTexture !== matricesTexture ) {
+		const { image, format, type, version } = batchMesh._matricesTexture;
 
-		if ( data !== undefined ) data.previousMatricesTexture.dispose(); // the matrices texture is replaced when the instance count changes
+		previousMatricesTexture = new DataTexture( image.data.slice(), image.width, image.height, format, type );
+		previousMatricesTexture.version = version;
 
-		const { image, format, type, version } = matricesTexture;
-
-		const previousMatricesTexture = new DataTexture( image.data.slice(), image.width, image.height, format, type );
-		previousMatricesTexture.needsUpdate = true;
-
-		data = {
-			matricesTexture,
-			previousMatricesTexture,
-			version,
-			node: createBatchingMatrixNode( previousMatricesTexture, id )
-		};
-
-		_previousBatchingMatrices.set( batchMesh, data );
+		batchMesh._previousMatricesTexture = previousMatricesTexture;
 
 	}
 
-	return data.node;
+	return previousMatricesTexture;
 
 }
 
@@ -24653,21 +24639,19 @@ const batch = /*@__PURE__*/ Fn( ( [ batchMesh ], builder ) => {
 
 		OnAfterObjectUpdate( ( { object } ) => {
 
-			const previousBatchData = _previousBatchingMatrices.get( object );
+			const previousMatricesTexture = getPreviousMatricesTexture( object );
 			const matricesTexture = object._matricesTexture;
 
-			if ( previousBatchData.version !== matricesTexture.version ) {
+			if ( previousMatricesTexture.version !== matricesTexture.version ) {
 
-				previousBatchData.previousMatricesTexture.image.data.set( matricesTexture.image.data );
-				previousBatchData.previousMatricesTexture.needsUpdate = true;
-
-				previousBatchData.version = matricesTexture.version;
+				previousMatricesTexture.image.data.set( matricesTexture.image.data );
+				previousMatricesTexture.version = matricesTexture.version;
 
 			}
 
 		} );
 
-		const previousBatchingMatrixNode = getPreviousNode( batchMesh, indirectId );
+		const previousBatchingMatrixNode = createBatchingMatrixNode( getPreviousMatricesTexture( batchMesh ), indirectId );
 		positionPrevious.assign( previousBatchingMatrixNode.mul( positionPrevious ).xyz );
 
 	}
@@ -24684,9 +24668,11 @@ const batch = /*@__PURE__*/ Fn( ( [ batchMesh ], builder ) => {
 
 	}
 
+	const drawFormat = builder.renderer.backend.isWebGPUBackend === true ? 'merged' : 'multiDraw';
+
 	OnObjectUpdate( ( { object, camera, material } ) => {
 
-		object._updateDrawParameters( camera, object.geometry, material );
+		object._updateDrawParameters( camera, object.geometry, material, drawFormat );
 
 	} );
 
@@ -35310,6 +35296,12 @@ class LightsNode extends Node {
 
 		}
 
+		if ( builder.context.lightProbeIrradiance !== undefined ) {
+
+			builder.context.irradiance.addAssign( builder.context.lightProbeIrradiance );
+
+		}
+
 	}
 
 	getLightNodes( builder ) {
@@ -36786,6 +36778,55 @@ const _cubeUpsWebGL = [
 	/*@__PURE__*/ new Vector3( 0, 0, -1 ), /*@__PURE__*/ new Vector3( 0, -1, 0 ), /*@__PURE__*/ new Vector3( 0, -1, 0 )
 ];
 
+/**
+ * Returns a function that gives the depth the cube shadow map stores for the point at
+ * `direction * distance`, from the largest absolute component of the direction. Each face
+ * stores the depth along its own axis, and perspective depth is `depthA + depthB / max( |x|, |y|, |z| )`,
+ * so everything but the division is computed once.
+ *
+ * @private
+ * @param {Node<float>} distance - The distance from the light to the fragment.
+ * @param {Node<float>} near - The near plane of the shadow camera.
+ * @param {Node<float>} far - The far plane of the shadow camera.
+ * @param {Node<float>} bias - The shadow bias.
+ * @param {Renderer} renderer - The renderer.
+ * @return {function(Node<float>):Node<float>} The function, which takes the largest absolute component of the direction.
+ */
+const getPointShadowDepthFn = ( distance, near, far, bias, renderer ) => {
+
+	const { reversedDepthBuffer, logarithmicDepthBuffer } = renderer;
+
+	// logarithmic depth gets a separate depth function
+
+	if ( logarithmicDepthBuffer === true ) {
+
+		return ( maxAbs ) => viewZToLogarithmicDepth( maxAbs.mul( distance ).negate(), near, far ).add( bias );
+
+	}
+
+	// default and reverse depth share one
+
+	const depthRange = far.sub( near );
+	const nearFar = near.mul( far ).div( depthRange.mul( distance ) );
+
+	let depthA, depthB;
+
+	if ( reversedDepthBuffer === true ) {
+
+		depthA = near.div( depthRange ).add( bias ).negate().toConst();
+		depthB = nearFar.toConst();
+
+	} else {
+
+		depthA = far.div( depthRange ).add( bias ).toConst();
+		depthB = nearFar.negate().toConst();
+
+	}
+
+	return ( maxAbs ) => depthA.add( depthB.div( maxAbs ) );
+
+};
+
 const BasicPointShadowFilter = /*@__PURE__*/ Fn( ( { depthTexture, bd3D, dp } ) => {
 
 	return cubeTexture( depthTexture, bd3D ).compare( dp );
@@ -36802,14 +36843,17 @@ const BasicPointShadowFilter = /*@__PURE__*/ Fn( ( { depthTexture, bd3D, dp } ) 
  * @param {Object} inputs - The input parameter object.
  * @param {CubeDepthTexture} inputs.depthTexture - A reference to the shadow cube map.
  * @param {Node<vec3>} inputs.bd3D - The normalized direction from light to fragment.
- * @param {Node<float>} inputs.dp - The depth value to compare against.
+ * @param {Node<float>} inputs.distance - The distance from the light to the fragment.
  * @param {LightShadow} inputs.shadow - The light shadow.
  * @return {Node<float>} The filtering result.
  */
-const PointShadowFilter = /*@__PURE__*/ Fn( ( { depthTexture, bd3D, dp, shadow } ) => {
+const PointShadowFilter = /*@__PURE__*/ Fn( ( { depthTexture, bd3D, distance, shadow }, builder ) => {
 
 	const radius = reference( 'radius', 'float', shadow ).setGroup( renderGroup );
 	const mapSize = reference( 'mapSize', 'vec2', shadow ).setGroup( renderGroup );
+	const near = reference( 'near', 'float', shadow.camera ).setGroup( renderGroup );
+	const far = reference( 'far', 'float', shadow.camera ).setGroup( renderGroup );
+	const bias = reference( 'bias', 'float', shadow ).setGroup( renderGroup );
 
 	const texelSize = radius.div( mapSize.x ).toConst();
 
@@ -36821,6 +36865,10 @@ const PointShadowFilter = /*@__PURE__*/ Fn( ( { depthTexture, bd3D, dp, shadow }
 	// Use IGN to rotate sampling pattern per pixel (phi = IGN * 2π)
 	const phi = interleavedGradientNoise( screenCoordinate.xy ).mul( 6.28318530718 ).toConst();
 
+	// Each sample is compared against the depth of the point next to the fragment in its direction,
+	// on whichever face of the cube it falls, so the comparison is the same on every face.
+	const getDepth = getPointShadowDepthFn( distance, near, far, bias, builder.renderer );
+
 	// Accumulate five samples using Vogel disk distribution in tangent space.
 
 	const result = float( 0.0 ).toVar();
@@ -36828,8 +36876,11 @@ const PointShadowFilter = /*@__PURE__*/ Fn( ( { depthTexture, bd3D, dp, shadow }
 	Loop( 5, ( { i } ) => {
 
 		const sample = vogelDiskSample( i, 5, phi );
-		const direction = bd3D.add( tangent.mul( sample.x ).add( bitangent.mul( sample.y ) ).mul( texelSize ) );
-		result.addAssign( cubeTexture( depthTexture, direction ).compare( dp ) );
+		const direction = bd3D.add( tangent.mul( sample.x ).add( bitangent.mul( sample.y ) ).mul( texelSize ) ).toConst();
+		const absDirection = abs( direction ).toConst();
+		const maxAbs = max( absDirection.x, absDirection.y, absDirection.z ).toConst();
+
+		result.addAssign( cubeTexture( depthTexture, direction ).compare( getDepth( maxAbs ) ) );
 
 	} );
 
@@ -36853,30 +36904,15 @@ const pointShadowFilter = /*@__PURE__*/ Fn( ( { filterFn, depthTexture, shadowCo
 
 	If( viewZ.sub( shadowCameraFar ).lessThanEqual( 0.0 ).and( viewZ.sub( shadowCameraNear ).greaterThanEqual( 0.0 ) ), () => {
 
-		let dp;
-
-		if ( builder.renderer.reversedDepthBuffer ) {
-
-			dp = viewZToReversedPerspectiveDepth( viewZ.negate(), shadowCameraNear, shadowCameraFar );
-			dp.subAssign( bias );
-
-		} else if ( builder.renderer.logarithmicDepthBuffer ) {
-
-			dp = viewZToLogarithmicDepth( viewZ.negate(), shadowCameraNear, shadowCameraFar );
-			dp.addAssign( bias );
-
-		} else {
-
-			dp = viewZToPerspectiveDepth( viewZ.negate(), shadowCameraNear, shadowCameraFar );
-			dp.addAssign( bias );
-
-		}
-
 		// bd3D = base direction 3D (direction from light to fragment)
 		const bd3D = shadowPosition.normalize();
+		const distance = shadowPosition.length();
+
+		const getDepth = getPointShadowDepthFn( distance, shadowCameraNear, shadowCameraFar, bias, builder.renderer );
+		const dp = getDepth( viewZ.div( distance ) );
 
 		// percentage-closer filtering using cube texture sampling
-		result.assign( filterFn( { depthTexture, bd3D, dp, shadow } ) );
+		result.assign( filterFn( { depthTexture, bd3D, dp, distance, shadow } ) );
 
 	} );
 
