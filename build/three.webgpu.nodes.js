@@ -9815,19 +9815,13 @@ function builtinAOContext( aoNode, node = null ) {
  */
 function builtinGIContext( aoNode, giNode, node = null ) {
 
-	// the lighting models multiply the whole indirect diffuse term by the AO, which would occlude
-	// the GI a second time. Dividing the GI by the AO cancels that out so only the environment
-	// lighting is modulated.
-
-	const ao = aoNode.max( 1e-3 );
-
 	return context( node, {
 
 		getAO: ( inputNode, { material } ) => {
 
 			if ( material.transparent === true ) return inputNode;
 
-			return inputNode !== null ? inputNode.mul( ao ) : ao;
+			return inputNode !== null ? inputNode.mul( aoNode ) : aoNode;
 
 		},
 
@@ -9835,9 +9829,7 @@ function builtinGIContext( aoNode, giNode, node = null ) {
 
 			if ( material.transparent === true ) return inputNode;
 
-			const gi = giNode.div( ao );
-
-			return inputNode !== null ? inputNode.add( gi ) : gi;
+			return inputNode !== null ? inputNode.add( giNode ) : giNode;
 
 		}
 
@@ -17687,6 +17679,47 @@ const packNormalToRGB = ( node ) => nodeObject( node ).mul( 0.5 ).add( 0.5 );
 const unpackRGBToNormal = ( node ) => nodeObject( node ).mul( 2.0 ).sub( 1 );
 
 /**
+ * Encodes a nonzero direction as signed octahedral coordinates in `[-1, 1]`
+ * (Cigolle et al., {@link https://jcgt.org/published/0003/02/01/ A Survey of Efficient Representations for Independent Unit Vectors}, 2014).
+ * Store the result in a signed two-channel format such as RG16F or RG16 snorm. The input does not need to be normalized.
+ *
+ * @tsl
+ * @function
+ * @param {Node<vec3>} normal - The nonzero direction to encode.
+ * @return {Node<vec2>} The signed octahedral coordinates.
+ */
+const packNormalToOctahedral = /*@__PURE__*/ Fn( ( [ normal ] ) => {
+
+	const p = normal.xy.div( normal.x.abs().add( normal.y.abs() ).add( normal.z.abs() ) ).toVar();
+
+	// zero counts as positive, otherwise the negative Z pole collapses onto the positive one
+
+	const signNotZero = vec2( p.x.greaterThanEqual( 0 ).select( 1, -1 ), p.y.greaterThanEqual( 0 ).select( 1, -1 ) );
+	return normal.z.lessThan( 0 ).select( p.yx.abs().oneMinus().mul( signNotZero ), p );
+
+}, { normal: 'vec3', return: 'vec2' } );
+
+/**
+ * Decodes signed octahedral coordinates into a unit direction.
+ *
+ * @tsl
+ * @function
+ * @param {Node<vec2>} encoded - The signed octahedral coordinates in `[-1, 1]`.
+ * @return {Node<vec3>} The normalized direction.
+ */
+const unpackOctahedralToNormal = /*@__PURE__*/ Fn( ( [ encoded ] ) => {
+
+	// Rune Stubbe's decoder, see https://x.com/Stubbesaurus/status/937994790553227264
+
+	const normal = vec3( encoded, float( 1 ).sub( encoded.x.abs() ).sub( encoded.y.abs() ) ).toVar();
+	const t = normal.z.negate().max( 0 ).toVar();
+	normal.x.addAssign( normal.x.greaterThanEqual( 0 ).select( t.negate(), t ) );
+	normal.y.addAssign( normal.y.greaterThanEqual( 0 ).select( t.negate(), t ) );
+	return normal.normalize();
+
+}, { encoded: 'vec2', return: 'vec3' } );
+
+/**
  * Unpacks a tangent space normal, reconstructing the Z component by projecting the X,Y coordinates onto the hemisphere.
  * The X,Y coordinates are expected to be in the [-1, 1] range.
  *
@@ -21512,6 +21545,48 @@ class AONode extends LightingNode {
 }
 
 /**
+ * A generic class that can be used by nodes which contribute irradiance
+ * that already accounts for ambient occlusion, e.g. global illumination.
+ * Unlike {@link IrradianceNode}, the contribution is not modulated by
+ * the ambient occlusion of the lighting model. Used in {@link NodeMaterial}.
+ *
+ * @augments LightingNode
+ */
+class OcclusionAwareIrradianceNode extends LightingNode {
+
+	static get type() {
+
+		return 'OcclusionAwareIrradianceNode';
+
+	}
+
+	/**
+	 * Constructs a new occlusion-aware irradiance node.
+	 *
+	 * @param {Node<vec3>} node - A node contributing irradiance that accounts for ambient occlusion.
+	 */
+	constructor( node ) {
+
+		super();
+
+		/**
+		 * A node contributing irradiance that accounts for ambient occlusion.
+		 *
+		 * @type {Node<vec3>}
+		 */
+		this.node = node;
+
+	}
+
+	setup( builder ) {
+
+		builder.context.occlusionAwareIrradiance.addAssign( this.node );
+
+	}
+
+}
+
+/**
  * `LightingContextNode` represents an extension of the {@link ContextNode} module
  * by adding lighting specific context data. It represents the runtime context of
  * {@link LightsNode}.
@@ -21579,7 +21654,7 @@ class LightingContextNode extends ContextNode {
 	 * @return {{
 	 * radiance: Node<vec3>,
 	 * irradiance: Node<vec3>,
-	 * iblIrradiance: Node<vec3>,
+	 * occlusionAwareIrradiance: Node<vec3>,
 	 * ambientOcclusion: Node<float>,
 	 * reflectedLight: {directDiffuse: Node<vec3>, directSpecular: Node<vec3>, indirectDiffuse: Node<vec3>, indirectSpecular: Node<vec3>},
 	 * backdrop: Node<vec3>,
@@ -21605,7 +21680,7 @@ class LightingContextNode extends ContextNode {
 		const context = {
 			radiance: vec3().toVar( 'radiance' ),
 			irradiance: vec3().toVar( 'irradiance' ),
-			iblIrradiance: vec3().toVar( 'iblIrradiance' ),
+			occlusionAwareIrradiance: vec3().toVar( 'occlusionAwareIrradiance' ),
 			ambientOcclusion: float( 1 ).toVar( 'ambientOcclusion' ),
 			reflectedLight,
 			materialLightings,
@@ -24338,11 +24413,15 @@ class NodeMaterial extends Material {
 
 		if ( builder.context.getGI ) {
 
-			const giNode = builder.context.getGI( null, builder );
+			let giNode = builder.context.getGI( null, builder );
 
 			if ( giNode !== null ) {
 
-				materialLightsNode.push( new IrradianceNode( giNode ) );
+				const aoNode = this.aoNode || ( builder.material.aoMap ? materialAO : null );
+
+				if ( aoNode !== null ) giNode = giNode.mul( aoNode );
+
+				materialLightsNode.push( new OcclusionAwareIrradianceNode( giNode ) );
 
 			}
 
@@ -26318,6 +26397,16 @@ class LightingModel {
 	indirect( /*builder*/ ) { }
 
 	/**
+	 * This method is intended for reflecting ambient lights and light probes, which stand
+	 * in for a distant environment. It is called by the light nodes while they are set up.
+	 *
+	 * @abstract
+	 * @param {function(Node<vec3>):Node<vec3>} irradianceAt - Returns the light's irradiance for a world space direction.
+	 * @param {NodeBuilder} builder - The current node builder.
+	 */
+	indirectRadiance( /*irradianceAt, builder*/ ) { }
+
+	/**
 	 * This method is intended for implementing the ambient occlusion term.
 	 * Unlike other methods, this method must be called manually by the lighting
 	 * model in its indirect term.
@@ -26644,11 +26733,9 @@ class PhongLightingModel extends BasicLightingModel {
 	 */
 	indirect( builder ) {
 
-		const { ambientOcclusion, irradiance, reflectedLight } = builder.context;
+		const { ambientOcclusion, irradiance, occlusionAwareIrradiance, reflectedLight } = builder.context;
 
-		reflectedLight.indirectDiffuse.addAssign( irradiance.mul( BRDF_Lambert( { diffuseColor } ) ) );
-
-		reflectedLight.indirectDiffuse.mulAssign( ambientOcclusion );
+		reflectedLight.indirectDiffuse.addAssign( irradiance.mul( ambientOcclusion ).add( occlusionAwareIrradiance ).mul( BRDF_Lambert( { diffuseColor } ) ) );
 
 	}
 
@@ -27709,6 +27796,22 @@ const IBLSheenBRDF = /*@__PURE__*/ Fn( ( { normal, viewDir, roughness } ) => {
 
 }, { normal: 'vec3', viewDir: 'vec3', roughness: 'float', return: 'float' } );
 
+//
+//	Ambient occlusion
+//
+
+// Jimenez et al. 2016, "Practical Realtime Strategies for Accurate Indirect Occlusion"
+// Light surfaces bounce light back into their crevices, so they darken less
+const multiBounceOcclusion = /*@__PURE__*/ Fn( ( [ visibility, albedo ] ) => {
+
+	const a = albedo.mul( 2.0404 ).sub( 0.3324 );
+	const b = albedo.mul( -4.7951 ).add( 0.6417 );
+	const c = albedo.mul( 2.7552 ).add( 0.6903 );
+
+	return visibility.mul( a ).add( b ).mul( visibility ).add( c ).mul( visibility ).max( visibility );
+
+} );
+
 const clearcoatF0 = vec3( 0.04 );
 const clearcoatF90 = float( 1 );
 
@@ -28181,13 +28284,42 @@ class PhysicalLightingModel extends LightingModel {
 	}
 
 	/**
+	 * Reflects ambient lights and light probes, which stand in for a distant
+	 * environment that reflects its irradiance / PI.
+	 *
+	 * @param {function(Node<vec3>):Node<vec3>} irradianceAt - Returns the light's irradiance for a world space direction.
+	 * @param {NodeBuilder} builder - The current node builder.
+	 */
+	indirectRadiance( irradianceAt, builder ) {
+
+		const radianceAt = ( normal, roughness ) => {
+
+			// Mixing the reflection with the normal is more accurate for rough objects, see EnvironmentNode
+			const reflectVec = positionViewDirection.negate().reflect( normal );
+			const direction = pow4( roughness ).mix( reflectVec, normal ).normalize().transformDirection( cameraWorldMatrix );
+
+			return irradianceAt( direction ).div( Math.PI );
+
+		};
+
+		builder.context.radiance.addAssign( radianceAt( normalView, roughness ) );
+
+		if ( this.clearcoat === true ) {
+
+			this.clearcoatRadiance.addAssign( radianceAt( clearcoatNormalView, clearcoatRoughness ) );
+
+		}
+
+	}
+
+	/**
 	 * Implements the indirect diffuse term.
 	 *
 	 * @param {NodeBuilder} builder - The current node builder.
 	 */
 	indirectDiffuse( builder ) {
 
-		const { irradiance, reflectedLight } = builder.context;
+		const { ambientOcclusion, irradiance, occlusionAwareIrradiance, reflectedLight } = builder.context;
 
 		// Energy reflected by the specular lobe is not available to the diffuse layer
 		const singleScattering = this.singleScatteringDielectric;
@@ -28197,13 +28329,15 @@ class PhysicalLightingModel extends LightingModel {
 			? this.eonDirectionalAlbedo.mul( metalness.oneMinus(), 1 / Math.PI )
 			: BRDF_Lambert( { diffuseColor: diffuseContribution } );
 
-		const diffuse = irradiance.mul( diffuseBRDF ).mul( singleScattering.add( multiScattering ).oneMinus() ).toVar();
+		const diffuseIrradiance = irradiance.mul( multiBounceOcclusion( ambientOcclusion, diffuseContribution ) ).add( occlusionAwareIrradiance );
+
+		const diffuse = diffuseIrradiance.mul( diffuseBRDF ).mul( singleScattering.add( multiScattering ).oneMinus() ).toVar();
 
 		if ( this.sheen === true ) {
 
 			const sheenAlbedo = IBLSheenBRDF( { normal: normalView, viewDir: positionViewDirection, roughness: sheenRoughness } );
 
-			this.sheenSpecularIndirect.addAssign( irradiance.mul( sheen, sheenAlbedo, 1 / Math.PI ) );
+			this.sheenSpecularIndirect.addAssign( irradiance.mul( ambientOcclusion ).add( occlusionAwareIrradiance ).mul( sheen, sheenAlbedo, 1 / Math.PI ) );
 
 			const sheenEnergyComp = sheen.r.max( sheen.g ).max( sheen.b ).mul( sheenAlbedo ).oneMinus();
 
@@ -28222,21 +28356,7 @@ class PhysicalLightingModel extends LightingModel {
 	 */
 	indirectSpecular( builder ) {
 
-		const { radiance, iblIrradiance, reflectedLight } = builder.context;
-
-		if ( this.sheen === true ) {
-
-			this.sheenSpecularIndirect.addAssign( iblIrradiance.mul(
-				sheen,
-				IBLSheenBRDF( {
-					normal: normalView,
-					viewDir: positionViewDirection,
-					roughness: sheenRoughness
-				} ),
-				1 / Math.PI
-			) );
-
-		}
+		const { radiance, reflectedLight } = builder.context;
 
 		if ( this.clearcoat === true ) {
 
@@ -28253,7 +28373,6 @@ class PhysicalLightingModel extends LightingModel {
 
 		}
 
-		// Both indirect specular and indirect diffuse light accumulate here
 		// Compute multiscattering separately for dielectric and metallic, then mix
 
 		const singleScatteringDielectric = this.singleScatteringDielectric;
@@ -28267,19 +28386,9 @@ class PhysicalLightingModel extends LightingModel {
 		const singleScattering = mix( singleScatteringDielectric, singleScatteringMetallic, metalness );
 		const multiScattering = mix( multiScatteringDielectric, multiScatteringMetallic, metalness );
 
-		// Diffuse energy conservation uses dielectric path
-		const totalScatteringDielectric = singleScatteringDielectric.add( multiScatteringDielectric );
-
-		const diffuseAlbedo = this.diffuseRoughness
-			? this.eonDirectionalAlbedo.mul( metalness.oneMinus() )
-			: diffuseContribution;
-
-		const diffuse = diffuseAlbedo.mul( totalScatteringDielectric.oneMinus() );
-
-		const cosineWeightedIrradiance = iblIrradiance.mul( 1 / Math.PI );
-
-		const indirectSpecular = radiance.mul( singleScattering ).add( multiScattering.mul( cosineWeightedIrradiance ) ).toVar();
-		const indirectDiffuse = diffuse.mul( cosineWeightedIrradiance ).toVar();
+		// The multiple scattering lobe has the shape of the single scattering lobe, so it scales the radiance, see
+		// Turquin, "Practical multiple scattering compensation for microfacet models"
+		const indirectSpecular = radiance.mul( singleScattering.add( multiScattering ) ).toVar();
 
 		if ( this.sheen === true ) {
 
@@ -28288,13 +28397,10 @@ class PhysicalLightingModel extends LightingModel {
 			const sheenEnergyComp = sheen.r.max( sheen.g ).max( sheen.b ).mul( sheenAlbedo ).oneMinus();
 
 			indirectSpecular.mulAssign( sheenEnergyComp );
-			indirectDiffuse.mulAssign( sheenEnergyComp );
 
 		}
 
 		reflectedLight.indirectSpecular.addAssign( indirectSpecular );
-
-		reflectedLight.indirectDiffuse.addAssign( indirectDiffuse );
 
 	}
 
@@ -28307,27 +28413,25 @@ class PhysicalLightingModel extends LightingModel {
 
 		const { ambientOcclusion, reflectedLight } = builder.context;
 
-		const dotNV = normalView.dot( positionViewDirection ).clamp(); // @ TODO: Move to core dotNV
+		const computeSpecularOcclusion = ( normal, roughness ) => {
 
-		const aoNV = dotNV.add( ambientOcclusion );
-		const aoExp = roughness.mul( -16 ).oneMinus().negate().exp2();
+			const dotNV = normal.dot( positionViewDirection ).clamp(); // @ TODO: Move to core dotNV
 
-		const aoNode = ambientOcclusion.sub( aoNV.pow( aoExp ).oneMinus() ).clamp();
+			const aoNV = dotNV.add( ambientOcclusion );
+			const aoExp = roughness.mul( -16 ).oneMinus().negate().exp2();
+
+			return ambientOcclusion.sub( aoNV.pow( aoExp ).oneMinus() ).clamp();
+
+		};
 
 		if ( this.clearcoat === true ) {
 
-			this.clearcoatSpecularIndirect.mulAssign( ambientOcclusion );
+			this.clearcoatSpecularIndirect.mulAssign( computeSpecularOcclusion( clearcoatNormalView, clearcoatRoughness ) );
 
 		}
 
-		if ( this.sheen === true ) {
-
-			this.sheenSpecularIndirect.mulAssign( ambientOcclusion );
-
-		}
-
-		reflectedLight.indirectDiffuse.mulAssign( ambientOcclusion );
-		reflectedLight.indirectSpecular.mulAssign( aoNode );
+		const soNode = computeSpecularOcclusion( normalView, roughness );
+		reflectedLight.indirectSpecular.mulAssign( multiBounceOcclusion( soNode, specularColorBlended ) );
 
 	}
 
@@ -29674,7 +29778,7 @@ class EnvironmentNode extends LightingNode {
 
 		builder.context.radiance.addAssign( radiance );
 
-		builder.context.iblIrradiance.addAssign( isolateIrradiance );
+		builder.context.irradiance.addAssign( isolateIrradiance );
 
 		//
 
@@ -30751,11 +30855,9 @@ class ToonLightingModel extends LightingModel {
 	 */
 	indirect( builder ) {
 
-		const { ambientOcclusion, irradiance, reflectedLight } = builder.context;
+		const { ambientOcclusion, irradiance, occlusionAwareIrradiance, reflectedLight } = builder.context;
 
-		reflectedLight.indirectDiffuse.addAssign( irradiance.mul( BRDF_Lambert( { diffuseColor } ) ) );
-
-		reflectedLight.indirectDiffuse.mulAssign( ambientOcclusion );
+		reflectedLight.indirectDiffuse.addAssign( irradiance.mul( ambientOcclusion ).add( occlusionAwareIrradiance ).mul( BRDF_Lambert( { diffuseColor } ) ) );
 
 	}
 
@@ -48315,8 +48417,9 @@ class ShadowBaseNode extends Node {
 	 * Constructs a new shadow base node.
 	 *
 	 * @param {Light} light - The shadow casting light.
+	 * @param {LightShadow} [shadow=light.shadow] - The light shadow.
 	 */
-	constructor( light ) {
+	constructor( light, shadow = light.shadow ) {
 
 		super();
 
@@ -48326,6 +48429,32 @@ class ShadowBaseNode extends Node {
 		 * @type {Light}
 		 */
 		this.light = light;
+
+		/**
+		 * The light shadow which defines the properties light's
+		 * shadow.
+		 *
+		 * @type {LightShadow}
+		 */
+		this.shadow = shadow;
+
+		/**
+		 * A Weak Map holding the current frame ID per camera. Used
+		 * to control the update of shadow maps.
+		 *
+		 * @type {WeakMap<Camera,number>}
+		 * @private
+		 */
+		this._cameraFrameId = new WeakMap();
+
+		/**
+		 * Describes the render call that last updated the shadow map. Used
+		 * to share the shadow map with render calls nested in that one.
+		 *
+		 * @type {{frameId: number, callDepth: number, sceneId: number, layersMask: number}}
+		 * @private
+		 */
+		this._lastUpdate = { frameId: -1, callDepth: 0, sceneId: -1, layersMask: 0 };
 
 		/**
 		 * Overwritten since shadows are updated by default per render.
@@ -48398,6 +48527,81 @@ class ShadowBaseNode extends Node {
 		// Use assign inside an Fn()
 
 		shadowPositionWorld.assign( material.receivedShadowPositionNode || context.shadowPositionWorld || positionWorld );
+
+	}
+
+	/**
+	 * Updates the shadow. Must be implemented by subclasses.
+	 *
+	 * @abstract
+	 * @param {NodeFrame} frame - A reference to the current node frame.
+	 */
+	updateShadow( /*frame*/ ) {}
+
+	/**
+	 * Returns `true` if the shadow map must be rendered for the given frame. The shadow
+	 * map is rendered once per camera and frame. Renders nested in the one that has
+	 * updated the shadow map in the current frame share it.
+	 *
+	 * @param {NodeFrame} frame - A reference to the current node frame.
+	 * @return {boolean} Whether the shadow map must be rendered.
+	 */
+	needsRefresh( frame ) {
+
+		const { frameId, camera, scene } = frame;
+
+		if ( this._cameraFrameId.get( camera ) === frameId ) return false;
+
+		const lastUpdate = this._lastUpdate;
+
+		const hasMatchingShadows =
+			lastUpdate.frameId === frameId &&
+			lastUpdate.sceneId === scene.id &&
+			lastUpdate.layersMask === camera.layers.mask;
+
+		const isNestedRender = frame.renderer._callDepth > lastUpdate.callDepth;
+
+		return ( hasMatchingShadows && isNestedRender ) === false;
+
+	}
+
+	/**
+	 * The implementation performs the update of the shadow map if necessary.
+	 *
+	 * @param {NodeFrame} frame - A reference to the current node frame.
+	 */
+	updateBefore( frame ) {
+
+		// do not render shadow maps during precompilation
+
+		if ( frame.renderer._precompilationState !== null ) return false;
+
+		const { shadow } = this;
+
+		let needsUpdate = shadow.needsUpdate || shadow.autoUpdate;
+
+		if ( needsUpdate ) {
+
+			needsUpdate = this.needsRefresh( frame );
+
+			this._cameraFrameId.set( frame.camera, frame.frameId );
+
+		}
+
+		if ( needsUpdate ) {
+
+			const lastUpdate = this._lastUpdate;
+
+			lastUpdate.frameId = frame.frameId;
+			lastUpdate.callDepth = frame.renderer._callDepth;
+			lastUpdate.sceneId = frame.scene.id;
+			lastUpdate.layersMask = frame.camera.layers.mask;
+
+			this.updateShadow( frame );
+
+			shadow.needsUpdate = false;
+
+		}
 
 	}
 
@@ -48674,16 +48878,7 @@ class ShadowNode extends ShadowBaseNode {
 	 */
 	constructor( light, shadow = null ) {
 
-		super( light );
-
-		/**
-		 * The light shadow which defines the properties light's
-		 * shadow.
-		 *
-		 * @type {?LightShadow}
-		 * @default null
-		 */
-		this.shadow = shadow || light.shadow;
+		super( light, shadow || light.shadow );
 
 		/**
 		 * A reference to the shadow map which is a render target.
@@ -48757,15 +48952,6 @@ class ShadowNode extends ShadowBaseNode {
 		 * @default null
 		 */
 		this._currentTransmitted = null;
-
-		/**
-		 * A Weak Map holding the current frame ID per camera. Used
-		 * to control the update of shadow maps.
-		 *
-		 * @type {WeakMap<Camera,number>}
-		 * @private
-		 */
-		this._cameraFrameId = new WeakMap();
 
 		/**
 		 * This flag can be used for type testing.
@@ -49330,43 +49516,6 @@ class ShadowNode extends ShadowBaseNode {
 
 			this.vsmMaterialHorizontal.dispose();
 			this.vsmMaterialHorizontal = null;
-
-		}
-
-	}
-
-	/**
-	 * The implementation performs the update of the shadow map if necessary.
-	 *
-	 * @param {NodeFrame} frame - A reference to the current node frame.
-	 */
-	updateBefore( frame ) {
-
-		// do not render shadow maps during precompilation
-
-		if ( frame.renderer._precompilationState !== null ) return false;
-
-		const { shadow } = this;
-
-		let needsUpdate = shadow.needsUpdate || shadow.autoUpdate;
-
-		if ( needsUpdate ) {
-
-			if ( this._cameraFrameId.get( frame.camera ) === frame.frameId ) {
-
-				needsUpdate = false;
-
-			}
-
-			this._cameraFrameId.set( frame.camera, frame.frameId );
-
-		}
-
-		if ( needsUpdate ) {
-
-			this.updateShadow( frame );
-
-			shadow.needsUpdate = false;
 
 		}
 
@@ -58042,9 +58191,13 @@ class AmbientLightNode extends AnalyticLightNode {
 
 	}
 
-	setup( { context } ) {
+	setup( builder ) {
 
-		context.irradiance.addAssign( this.colorNode );
+		const { colorNode } = this;
+
+		builder.context.irradiance.addAssign( colorNode );
+
+		builder.context.lightingModel.indirectRadiance( () => colorNode, builder );
 
 	}
 
@@ -58151,12 +58304,18 @@ class HemisphereLightNode extends AnalyticLightNode {
 
 		const { colorNode, groundColorNode, lightDirectionNode } = this;
 
-		const dotNL = normalWorld.dot( lightDirectionNode );
-		const hemiDiffuseWeight = dotNL.mul( 0.5 ).add( 0.5 );
+		const irradianceAt = ( direction ) => {
 
-		const irradiance = mix( groundColorNode, colorNode, hemiDiffuseWeight );
+			const dotNL = direction.dot( lightDirectionNode );
+			const hemiDiffuseWeight = dotNL.mul( 0.5 ).add( 0.5 );
 
-		builder.context.irradiance.addAssign( irradiance );
+			return mix( groundColorNode, colorNode, hemiDiffuseWeight );
+
+		};
+
+		builder.context.irradiance.addAssign( irradianceAt( normalWorld ) );
+
+		builder.context.lightingModel.indirectRadiance( irradianceAt, builder );
 
 	}
 
@@ -58473,9 +58632,11 @@ class LightProbeNode extends AnalyticLightNode {
 
 	setup( builder ) {
 
-		const irradiance = getShIrradianceAt( normalWorld, this.lightProbe );
+		const irradianceAt = ( direction ) => getShIrradianceAt( direction, this.lightProbe );
 
-		builder.context.irradiance.addAssign( irradiance );
+		builder.context.irradiance.addAssign( irradianceAt( normalWorld ) );
+
+		builder.context.lightingModel.indirectRadiance( irradianceAt, builder );
 
 	}
 
@@ -89753,8 +89914,6 @@ class WebGPUBackend extends Backend {
 
 		this.device = device;
 
-		this.updateSize();
-
 	}
 
 	/**
@@ -91381,7 +91540,11 @@ class WebGPUBackend extends Backend {
 
 		// pipeline
 
-		const pipelineGPU = this.get( pipeline ).pipeline;
+		const pipelineData = this.get( pipeline );
+
+		if ( pipelineData.error === true ) return;
+
+		const pipelineGPU = pipelineData.pipeline;
 
 		if ( groupGPU.currentPipeline !== pipelineGPU ) {
 
@@ -91709,7 +91872,6 @@ class WebGPUBackend extends Backend {
 		const pipelineData = this.get( pipeline );
 		const pipelineGPU = pipelineData.pipeline;
 
-		// Skip if pipeline has error
 		if ( pipelineData.error === true ) return;
 
 		const drawParams = renderObject.getDrawParameters();
@@ -92473,7 +92635,12 @@ class WebGPUBackend extends Backend {
 	 */
 	updateSize() {
 
-		this.delete( this.renderer.getCanvasTarget() );
+		// the context configuration does not depend on the canvas size, so only the descriptor is reset
+
+		const canvasData = this.get( this.renderer.getCanvasTarget() );
+
+		delete canvasData.descriptor;
+		delete canvasData.samples;
 
 	}
 
@@ -94864,6 +95031,7 @@ var Three_TSL = /*#__PURE__*/Object.freeze({
 	pack4xU8: pack4xU8,
 	pack4xU8Clamp: pack4xU8Clamp,
 	packHalf2x16: packHalf2x16,
+	packNormalToOctahedral: packNormalToOctahedral,
 	packNormalToRGB: packNormalToRGB,
 	packSnorm2x16: packSnorm2x16,
 	packSnorm4x8: packSnorm4x8,
@@ -95047,6 +95215,7 @@ var Three_TSL = /*#__PURE__*/Object.freeze({
 	unpack4xU8: unpack4xU8,
 	unpackHalf2x16: unpackHalf2x16,
 	unpackNormal: unpackNormal,
+	unpackOctahedralToNormal: unpackOctahedralToNormal,
 	unpackRGBToNormal: unpackRGBToNormal,
 	unpackSnorm2x16: unpackSnorm2x16,
 	unpackSnorm4x8: unpackSnorm4x8,
@@ -95096,4 +95265,4 @@ var Three_TSL = /*#__PURE__*/Object.freeze({
 	xor: xor
 });
 
-export { ACESFilmicToneMapping, AONode, AddEquation, AddOperation, AdditiveBlending, AgXToneMapping, AlphaFormat, AlwaysCompare, AlwaysDepth, AlwaysStencilFunc, AmbientLight, AmbientLightNode, AnalyticLightNode, ArrayCamera, ArrayElementNode, ArrayNode, AssignNode, AtomicFunctionNode, AttributeNode, BackSide, BarrierNode, BasicEnvironmentNode, BasicLightMapNode, BasicShadowMap, BitcastNode, BitcountNode, BlendMode, BoxGeometry, BufferAttribute, BufferAttributeNode, BufferGeometry, BufferNode, BuiltinNode, BumpMapNode, BundleGroup, BypassNode, ByteType, CanvasTarget, CineonToneMapping, ClampToEdgeWrapping, ClippingGroup, ClippingNode, CodeNode, Color, ColorManagement, ColorSpaceNode, Compatibility, ComputeBuiltinNode, ComputeNode, ConditionalNode, ConstNode, ConstantAlphaFactor, ConstantColorFactor, ContextNode, ConvertNode, CubeCamera, CubeDepthTexture, CubeMapNode, CubeReflectionMapping, CubeRefractionMapping, CubeTexture, CubeTextureNode, CullFaceBack, CullFaceFront, CullFaceNone, CustomBlending, CylinderGeometry, Data3DTexture, DataArrayTexture, DataTexture, DebugNode, DecrementStencilOp, DecrementWrapStencilOp, DepthFormat, DepthStencilFormat, DepthTexture, DirectRenderPipeline, DirectionalLight, DirectionalLightNode, DoubleSide, DstAlphaFactor, DstColorFactor, DynamicDrawUsage, EnvironmentNode, EqualCompare, EqualDepth, EqualStencilFunc, EquirectangularReflectionMapping, EquirectangularRefractionMapping, EventDispatcher, EventNode, ExpressionNode, FileLoader, FlipNode, Float32BufferAttribute, FloatType, FramebufferTexture, FrontFacingNode, FrontSide, Frustum, FrustumArray, FunctionCallNode, FunctionNode, FunctionOverloadingNode, GLSLNodeParser, GPUTimer, GreaterCompare, GreaterDepth, GreaterEqualCompare, GreaterEqualDepth, GreaterEqualStencilFunc, GreaterStencilFunc, Group, HalfFloatType, HemisphereLight, HemisphereLightNode, IESSpotLight, IESSpotLightNode, IncrementStencilOp, IncrementWrapStencilOp, IndexNode, IndirectStorageBufferAttribute, InputNode, InspectorBase, InspectorNode, InstancedBufferAttribute, IntType, InterleavedBuffer, InterleavedBufferAttribute, InvertStencilOp, IrradianceNode, IsolateNode, JoinNode, KeepStencilOp, LessCompare, LessDepth, LessEqualCompare, LessEqualDepth, LessEqualStencilFunc, LessStencilFunc, LightProbe, LightProbeNode, Lighting, LightingContextNode, LightingModel, LightingNode, LightsNode, Line2NodeMaterial, LineBasicMaterial, LineBasicNodeMaterial, LineDashedMaterial, LineDashedNodeMaterial, LinearFilter, LinearMipMapLinearFilter, LinearMipmapLinearFilter, LinearMipmapNearestFilter, LinearSRGBColorSpace, LinearToneMapping, LinearTransfer, Loader, LoopNode, MRTNode, Material, MaterialBlending, MaterialLoader, MaterialNode, MaterialReferenceNode, MathNode, Matrix2, Matrix3, Matrix4, MaxEquation, MaxMipLevelNode, MemberNode, Mesh, MeshBasicMaterial, MeshBasicNodeMaterial, MeshLambertMaterial, MeshLambertNodeMaterial, MeshMatcapMaterial, MeshMatcapNodeMaterial, MeshNormalMaterial, MeshNormalNodeMaterial, MeshPhongMaterial, MeshPhongNodeMaterial, MeshPhysicalMaterial, MeshPhysicalNodeMaterial, MeshSSSNodeMaterial, MeshStandardMaterial, MeshStandardNodeMaterial, MeshToonMaterial, MeshToonNodeMaterial, MinEquation, MirroredRepeatWrapping, MixOperation, ModelNode, MultiplyBlending, MultiplyOperation, NearestFilter, NearestMipmapLinearFilter, NearestMipmapNearestFilter, NeutralToneMapping, NeverCompare, NeverDepth, NeverStencilFunc, NoBlending, NoColorSpace, NoNormalPacking, NoToneMapping, Node, NodeAccess, NodeAttribute, NodeBuilder, NodeCache, NodeCode, NodeError, NodeFrame, NodeFunctionInput, NodeLoader, NodeMaterial, NodeMaterialInstance, NodeMaterialLoader, NodeMaterialObserver, NodeObjectLoader, NodeShaderStage, NodeType, NodeUniform, NodeUpdateType, NodeUtils, NodeVar, NodeVarying, NormalBlending, NormalGAPacking, NormalMapNode, NormalRGPacking, NotEqualCompare, NotEqualDepth, NotEqualStencilFunc, Object3D, Object3DNode, ObjectLoader, ObjectSpaceNormalMap, OneFactor, OneMinusConstantAlphaFactor, OneMinusConstantColorFactor, OneMinusDstAlphaFactor, OneMinusDstColorFactor, OneMinusSrcAlphaFactor, OneMinusSrcColorFactor, OperatorNode, OrthographicCamera, OutputStructNode, OverrideContextNode, PCFShadowMap, PCFSoftShadowMap, PMREMGenerator, PMREMNode, PackFloatNode, Packed4x8IntegerNode, ParameterNode, PassNode, PerspectiveCamera, PhongLightingModel, PhysicalLightingModel, Plane, PlaneGeometry, PointLight, PointLightNode, PointShadowNode, PointUVNode, PointsMaterial, PointsNodeMaterial, PostProcessing, ProjectorLight, ProjectorLightNode, PropertyNode, QuadMesh, Quaternion, R11_EAC_Format, RED_GREEN_RGTC2_Format, RED_RGTC1_Format, REVISION, RG11_EAC_Format, RGBAFormat, RGBAIntegerFormat, RGBA_ASTC_10x10_Format, RGBA_ASTC_10x5_Format, RGBA_ASTC_10x6_Format, RGBA_ASTC_10x8_Format, RGBA_ASTC_12x10_Format, RGBA_ASTC_12x12_Format, RGBA_ASTC_4x4_Format, RGBA_ASTC_5x4_Format, RGBA_ASTC_5x5_Format, RGBA_ASTC_6x5_Format, RGBA_ASTC_6x6_Format, RGBA_ASTC_8x5_Format, RGBA_ASTC_8x6_Format, RGBA_ASTC_8x8_Format, RGBA_BPTC_Format, RGBA_ETC2_EAC_Format, RGBA_PVRTC_2BPPV1_Format, RGBA_PVRTC_4BPPV1_Format, RGBA_S3TC_DXT1_Format, RGBA_S3TC_DXT3_Format, RGBA_S3TC_DXT5_Format, RGBFormat, RGBIntegerFormat, RGB_BPTC_SIGNED_Format, RGB_BPTC_UNSIGNED_Format, RGB_ETC1_Format, RGB_ETC2_Format, RGB_PVRTC_2BPPV1_Format, RGB_PVRTC_4BPPV1_Format, RGB_S3TC_DXT1_Format, RGFormat, RGIntegerFormat, RTTNode, RangeNode, ReadbackBuffer, RectAreaLight, RectAreaLightNode, RedFormat, RedIntegerFormat, ReferenceAttributeNode, ReferenceBaseNode, ReferenceElementNode, ReferenceNode, ReflectorNode, ReinhardToneMapping, RenderObjectRefreshType, RenderOutputNode, RenderPipeline, RenderTarget, RendererReferenceNode, RendererUtils, RepeatWrapping, ReplaceStencilOp, ReverseSubtractEquation, RotateNode, SIGNED_R11_EAC_Format, SIGNED_RED_GREEN_RGTC2_Format, SIGNED_RED_RGTC1_Format, SIGNED_RG11_EAC_Format, SRGBColorSpace, SRGBTransfer, SampleNode, Scene, SetNode, ShadowBaseNode, ShadowMaterial, ShadowNode, ShadowNodeMaterial, ShortType, Sphere, SphereGeometry, SplitNode, SpotLight, SpotLightNode, SpriteMaterial, SpriteNodeMaterial, SrcAlphaFactor, SrcAlphaSaturateFactor, SrcColorFactor, StackNode, StackTrace, StandardDrawingPipeline, StaticDrawUsage, StorageArrayElementNode, StorageBufferAttribute, StorageBufferNode, StorageInstancedBufferAttribute, StorageStructNode, StorageTexture, StorageTexture3DNode, StorageTextureNode, StructNode, StructTypeNode, SubBuildNode, SubgroupFunctionNode, SubtractEquation, SubtractiveBlending, Three_TSL as TSL, TangentSpaceNormalMap, TempNode, Texture, Texture3DNode, TextureNode, TextureSizeNode, ToneMappingNode, ToonOutlinePassNode, UVMapping, Uint16BufferAttribute, Uint32BufferAttribute, UniformArrayNode, UniformGroupNode, UniformNode, UnpackFloatNode, UnsignedByteType, UnsignedInt101111Type, UnsignedInt248Type, UnsignedInt5999Type, UnsignedIntType, UnsignedShort4444Type, UnsignedShort5551Type, UnsignedShortType, UserDataNode, VSMShadowMap, VarNode, VaryingNode, Vector2, Vector3, Vector4, VelocityNode, VertexColorNode, ViewportDepthNode, ViewportDepthTextureNode, ViewportSharedTextureNode, ViewportTextureNode, VolumeNodeMaterial, WebGLBackend, WebGLCoordinateSystem, WebGPUBackend, WebGPUCoordinateSystem, WebGPURenderer, WebXRController, WorkgroupInfoNode, ZeroFactor, ZeroStencilOp, createCanvasElement, defaultBuildStages, defaultShaderStages, error, log$1 as log, shaderStages, vectorComponents, warn, warnOnce };
+export { ACESFilmicToneMapping, AONode, AddEquation, AddOperation, AdditiveBlending, AgXToneMapping, AlphaFormat, AlwaysCompare, AlwaysDepth, AlwaysStencilFunc, AmbientLight, AmbientLightNode, AnalyticLightNode, ArrayCamera, ArrayElementNode, ArrayNode, AssignNode, AtomicFunctionNode, AttributeNode, BackSide, BarrierNode, BasicEnvironmentNode, BasicLightMapNode, BasicShadowMap, BitcastNode, BitcountNode, BlendMode, BoxGeometry, BufferAttribute, BufferAttributeNode, BufferGeometry, BufferNode, BuiltinNode, BumpMapNode, BundleGroup, BypassNode, ByteType, CanvasTarget, CineonToneMapping, ClampToEdgeWrapping, ClippingGroup, ClippingNode, CodeNode, Color, ColorManagement, ColorSpaceNode, Compatibility, ComputeBuiltinNode, ComputeNode, ConditionalNode, ConstNode, ConstantAlphaFactor, ConstantColorFactor, ContextNode, ConvertNode, CubeCamera, CubeDepthTexture, CubeMapNode, CubeReflectionMapping, CubeRefractionMapping, CubeTexture, CubeTextureNode, CullFaceBack, CullFaceFront, CullFaceNone, CustomBlending, CylinderGeometry, Data3DTexture, DataArrayTexture, DataTexture, DebugNode, DecrementStencilOp, DecrementWrapStencilOp, DepthFormat, DepthStencilFormat, DepthTexture, DirectRenderPipeline, DirectionalLight, DirectionalLightNode, DoubleSide, DstAlphaFactor, DstColorFactor, DynamicDrawUsage, EnvironmentNode, EqualCompare, EqualDepth, EqualStencilFunc, EquirectangularReflectionMapping, EquirectangularRefractionMapping, EventDispatcher, EventNode, ExpressionNode, FileLoader, FlipNode, Float32BufferAttribute, FloatType, FramebufferTexture, FrontFacingNode, FrontSide, Frustum, FrustumArray, FunctionCallNode, FunctionNode, FunctionOverloadingNode, GLSLNodeParser, GPUTimer, GreaterCompare, GreaterDepth, GreaterEqualCompare, GreaterEqualDepth, GreaterEqualStencilFunc, GreaterStencilFunc, Group, HalfFloatType, HemisphereLight, HemisphereLightNode, IESSpotLight, IESSpotLightNode, IncrementStencilOp, IncrementWrapStencilOp, IndexNode, IndirectStorageBufferAttribute, InputNode, InspectorBase, InspectorNode, InstancedBufferAttribute, IntType, InterleavedBuffer, InterleavedBufferAttribute, InvertStencilOp, IrradianceNode, IsolateNode, JoinNode, KeepStencilOp, LessCompare, LessDepth, LessEqualCompare, LessEqualDepth, LessEqualStencilFunc, LessStencilFunc, LightProbe, LightProbeNode, Lighting, LightingContextNode, LightingModel, LightingNode, LightsNode, Line2NodeMaterial, LineBasicMaterial, LineBasicNodeMaterial, LineDashedMaterial, LineDashedNodeMaterial, LinearFilter, LinearMipMapLinearFilter, LinearMipmapLinearFilter, LinearMipmapNearestFilter, LinearSRGBColorSpace, LinearToneMapping, LinearTransfer, Loader, LoopNode, MRTNode, Material, MaterialBlending, MaterialLoader, MaterialNode, MaterialReferenceNode, MathNode, Matrix2, Matrix3, Matrix4, MaxEquation, MaxMipLevelNode, MemberNode, Mesh, MeshBasicMaterial, MeshBasicNodeMaterial, MeshLambertMaterial, MeshLambertNodeMaterial, MeshMatcapMaterial, MeshMatcapNodeMaterial, MeshNormalMaterial, MeshNormalNodeMaterial, MeshPhongMaterial, MeshPhongNodeMaterial, MeshPhysicalMaterial, MeshPhysicalNodeMaterial, MeshSSSNodeMaterial, MeshStandardMaterial, MeshStandardNodeMaterial, MeshToonMaterial, MeshToonNodeMaterial, MinEquation, MirroredRepeatWrapping, MixOperation, ModelNode, MultiplyBlending, MultiplyOperation, NearestFilter, NearestMipmapLinearFilter, NearestMipmapNearestFilter, NeutralToneMapping, NeverCompare, NeverDepth, NeverStencilFunc, NoBlending, NoColorSpace, NoNormalPacking, NoToneMapping, Node, NodeAccess, NodeAttribute, NodeBuilder, NodeCache, NodeCode, NodeError, NodeFrame, NodeFunctionInput, NodeLoader, NodeMaterial, NodeMaterialInstance, NodeMaterialLoader, NodeMaterialObserver, NodeObjectLoader, NodeShaderStage, NodeType, NodeUniform, NodeUpdateType, NodeUtils, NodeVar, NodeVarying, NormalBlending, NormalGAPacking, NormalMapNode, NormalRGPacking, NotEqualCompare, NotEqualDepth, NotEqualStencilFunc, Object3D, Object3DNode, ObjectLoader, ObjectSpaceNormalMap, OcclusionAwareIrradianceNode, OneFactor, OneMinusConstantAlphaFactor, OneMinusConstantColorFactor, OneMinusDstAlphaFactor, OneMinusDstColorFactor, OneMinusSrcAlphaFactor, OneMinusSrcColorFactor, OperatorNode, OrthographicCamera, OutputStructNode, OverrideContextNode, PCFShadowMap, PCFSoftShadowMap, PMREMGenerator, PMREMNode, PackFloatNode, Packed4x8IntegerNode, ParameterNode, PassNode, PerspectiveCamera, PhongLightingModel, PhysicalLightingModel, Plane, PlaneGeometry, PointLight, PointLightNode, PointShadowNode, PointUVNode, PointsMaterial, PointsNodeMaterial, PostProcessing, ProjectorLight, ProjectorLightNode, PropertyNode, QuadMesh, Quaternion, R11_EAC_Format, RED_GREEN_RGTC2_Format, RED_RGTC1_Format, REVISION, RG11_EAC_Format, RGBAFormat, RGBAIntegerFormat, RGBA_ASTC_10x10_Format, RGBA_ASTC_10x5_Format, RGBA_ASTC_10x6_Format, RGBA_ASTC_10x8_Format, RGBA_ASTC_12x10_Format, RGBA_ASTC_12x12_Format, RGBA_ASTC_4x4_Format, RGBA_ASTC_5x4_Format, RGBA_ASTC_5x5_Format, RGBA_ASTC_6x5_Format, RGBA_ASTC_6x6_Format, RGBA_ASTC_8x5_Format, RGBA_ASTC_8x6_Format, RGBA_ASTC_8x8_Format, RGBA_BPTC_Format, RGBA_ETC2_EAC_Format, RGBA_PVRTC_2BPPV1_Format, RGBA_PVRTC_4BPPV1_Format, RGBA_S3TC_DXT1_Format, RGBA_S3TC_DXT3_Format, RGBA_S3TC_DXT5_Format, RGBFormat, RGBIntegerFormat, RGB_BPTC_SIGNED_Format, RGB_BPTC_UNSIGNED_Format, RGB_ETC1_Format, RGB_ETC2_Format, RGB_PVRTC_2BPPV1_Format, RGB_PVRTC_4BPPV1_Format, RGB_S3TC_DXT1_Format, RGFormat, RGIntegerFormat, RTTNode, RangeNode, ReadbackBuffer, RectAreaLight, RectAreaLightNode, RedFormat, RedIntegerFormat, ReferenceAttributeNode, ReferenceBaseNode, ReferenceElementNode, ReferenceNode, ReflectorNode, ReinhardToneMapping, RenderObjectRefreshType, RenderOutputNode, RenderPipeline, RenderTarget, RendererReferenceNode, RendererUtils, RepeatWrapping, ReplaceStencilOp, ReverseSubtractEquation, RotateNode, SIGNED_R11_EAC_Format, SIGNED_RED_GREEN_RGTC2_Format, SIGNED_RED_RGTC1_Format, SIGNED_RG11_EAC_Format, SRGBColorSpace, SRGBTransfer, SampleNode, Scene, SetNode, ShadowBaseNode, ShadowMaterial, ShadowNode, ShadowNodeMaterial, ShortType, Sphere, SphereGeometry, SplitNode, SpotLight, SpotLightNode, SpriteMaterial, SpriteNodeMaterial, SrcAlphaFactor, SrcAlphaSaturateFactor, SrcColorFactor, StackNode, StackTrace, StandardDrawingPipeline, StaticDrawUsage, StorageArrayElementNode, StorageBufferAttribute, StorageBufferNode, StorageInstancedBufferAttribute, StorageStructNode, StorageTexture, StorageTexture3DNode, StorageTextureNode, StructNode, StructTypeNode, SubBuildNode, SubgroupFunctionNode, SubtractEquation, SubtractiveBlending, Three_TSL as TSL, TangentSpaceNormalMap, TempNode, Texture, Texture3DNode, TextureNode, TextureSizeNode, ToneMappingNode, ToonOutlinePassNode, UVMapping, Uint16BufferAttribute, Uint32BufferAttribute, UniformArrayNode, UniformGroupNode, UniformNode, UnpackFloatNode, UnsignedByteType, UnsignedInt101111Type, UnsignedInt248Type, UnsignedInt5999Type, UnsignedIntType, UnsignedShort4444Type, UnsignedShort5551Type, UnsignedShortType, UserDataNode, VSMShadowMap, VarNode, VaryingNode, Vector2, Vector3, Vector4, VelocityNode, VertexColorNode, ViewportDepthNode, ViewportDepthTextureNode, ViewportSharedTextureNode, ViewportTextureNode, VolumeNodeMaterial, WebGLBackend, WebGLCoordinateSystem, WebGPUBackend, WebGPUCoordinateSystem, WebGPURenderer, WebXRController, WorkgroupInfoNode, ZeroFactor, ZeroStencilOp, createCanvasElement, defaultBuildStages, defaultShaderStages, error, log$1 as log, shaderStages, vectorComponents, warn, warnOnce };
